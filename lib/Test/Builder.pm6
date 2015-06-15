@@ -78,7 +78,7 @@ class Test::Builder {
         my $CLASS = __PACKAGE__;
 
         sub ok {
-            my($test, $name) = @_;
+            my ($test, $name) = @_;
             my $tb = $CLASS.builder;
 
             $tb.ok($test, $name);
@@ -120,7 +120,7 @@ singleton, use C<create>.
 our $Test = Test::Builder.new;
 
 sub new {
-    my($class) = shift;
+    my ($class) = shift;
     $Test ||= $class.create;
     return $Test;
 }
@@ -153,7 +153,7 @@ sub create {
 # This does *not* bless the destination.  This keeps the destructor from
 # firing when we're just storing a copy of the object to restore later.
 sub _copy {
-    my($src, $dest) = @_;
+    my ($src, $dest) = @_;
 
     %$dest = %$src;
     _share_keys($dest);
@@ -183,7 +183,7 @@ the test suite to fail.
 =cut
 
 sub child {
-    my( $self, $name ) = @_;
+    my ( $self, $name ) = @_;
 
     if ( $self.{Child_Name} ) {
         $self.croak("You already have a child named ($self.{Child_Name}) running");
@@ -235,7 +235,7 @@ subtests reference.
 
 sub subtest {
     my $self = shift;
-    my($name, $subtests, @args) = @_;
+    my ($name, $subtests, @args) = @_;
 
     if ('CODE' ne ref $subtests) {
         $self.croak("subtest()'s second argument must be a code ref");
@@ -431,7 +431,7 @@ test might be run multiple times in the same process.
 our $Level;
 
 sub reset {    ## no critic (Subroutines::ProhibitBuiltinHomonyms)
-my($self) = @_;
+my ($self) = @_;
 
 # We leave this a global because it has to be localized and localizing
 # hash keys is just asking for pain.  Also, it was documented.
@@ -527,7 +527,7 @@ my %plan_cmds = (
 );
 
 sub plan {
-    my( $self, $cmd, $arg ) = @_;
+    my ( $self, $cmd, $arg ) = @_;
 
     return unless $cmd;
 
@@ -549,7 +549,7 @@ sub plan {
 
 
 sub _plan_tests {
-    my($self, $arg) = @_;
+    my ($self, $arg) = @_;
 
     if ($arg) {
         local $Level = $Level + 1;
@@ -577,7 +577,7 @@ the appropriate headers.
 
 sub expected_tests {
     my $self = shift;
-    my($max) = @_;
+    my ($max) = @_;
 
     if (@_) {
         $self.croak("Number of tests must be a positive integer.  You gave it '$max'")
@@ -600,7 +600,7 @@ Declares that this test will run an indeterminate number of tests.
 =cut
 
 sub no_plan {
-    my($self, $arg) = @_;
+    my ($self, $arg) = @_;
 
     $self.carp("no_plan takes no arguments") if $arg;
 
@@ -633,7 +633,7 @@ output.
 =cut
 
 sub _output_plan {
-    my($self, $max, $directive, $reason) = @_;
+    my ($self, $max, $directive, $reason) = @_;
 
     $self.carp("The plan was already output") if $self.{Have_Output_Plan};
 
@@ -685,7 +685,7 @@ $Test.done_testing(scalar @tests);
 =cut
 
 sub done_testing {
-    my($self, $num_tests) = @_;
+    my ($self, $num_tests) = @_;
 
     # If done_testing() specified the number of tests, shut off no_plan.
     if ( defined $num_tests ) {
@@ -696,7 +696,7 @@ sub done_testing {
     }
 
     if ( $self.{Done_Testing} ) {
-        my($file, $line) = @{$self.{Done_Testing}}[1,2];
+        my ($file, $line) = @{$self.{Done_Testing}}[1,2];
         $self.ok(0, "done_testing() was already called at $file line $line");
         return;
     }
@@ -753,7 +753,7 @@ Skips all the tests, using the given C<$reason>.  Exits immediately with 0.
 =cut
 
 sub skip_all {
-    my( $self, $reason ) = @_;
+    my ( $self, $reason ) = @_;
 
     $self.{Skip_All} = $self.parent ? $reason : 1;
 
@@ -778,7 +778,7 @@ the last one will be honored.
 =cut
 
 sub exported_to {
-    my( $self, $pack ) = @_;
+    my ( $self, $pack ) = @_;
 
     if ( defined $pack ) {
         $self.{Exported_To} = $pack;
@@ -808,7 +808,7 @@ like Test::Simple's C<ok()>.
 =cut
 
 sub ok {
-    my( $self, $test, $name ) = @_;
+    my ( $self, $test, $name ) = @_;
 
     if ( $self.{Child_Name} and not $self.{In_Destroy} ) {
         $name = 'unnamed test' unless defined $name;
@@ -880,7 +880,7 @@ sub ok {
             my $msg = $self.in_todo ? "Failed (TODO)" : "Failed";
             $self._print_to_fh( $self._diag_fh, "\n" ) if $ENV{HARNESS_ACTIVE};
 
-            my( undef, $file, $line ) = $self.caller;
+            my ( undef, $file, $line ) = $self.caller;
             if ( defined $name ) {
                 $self.diag(qq[  $msg test '$name'\n]);
                 $self.diag(qq[  at $file line $line.\n]);
@@ -929,7 +929,7 @@ sub _unoverload {
 }
 
 sub _is_object {
-    my( $self, $thing ) = @_;
+    my ( $self, $thing ) = @_;
 
     return $self._try( sub { ref $thing && $thing.isa('UNIVERSAL') } ) ? 1 : 0;
 }
@@ -955,7 +955,7 @@ sub _unoverload_num {
 
 # This is a hack to detect a dualvar such as $!
 sub _is_dualvar {
-    my( $self, $val ) = @_;
+    my ( $self, $val ) = @_;
 
     # Objects are not dualvars.
     return 0 if ref $val;
@@ -986,7 +986,7 @@ C<undef> only ever matches another C<undef>.
 =cut
 
 sub is_eq {
-    my( $self, $got, $expect, $name ) = @_;
+    my ( $self, $got, $expect, $name ) = @_;
     local $Level = $Level + 1;
 
     if ( !defined $got || !defined $expect ) {
@@ -1002,7 +1002,7 @@ sub is_eq {
 }
 
 sub is_num {
-    my( $self, $got, $expect, $name ) = @_;
+    my ( $self, $got, $expect, $name ) = @_;
     local $Level = $Level + 1;
 
     if ( !defined $got || !defined $expect ) {
@@ -1018,7 +1018,7 @@ sub is_num {
 }
 
 sub _diag_fmt {
-    my( $self, $type, $val ) = @_;
+    my ( $self, $type, $val ) = @_;
 
     if ( defined $$val ) {
         if ( $type eq 'eq' or $type eq 'ne' ) {
@@ -1038,7 +1038,7 @@ sub _diag_fmt {
 }
 
 sub _is_diag {
-    my( $self, $got, $type, $expect ) = @_;
+    my ( $self, $got, $type, $expect ) = @_;
 
     $self._diag_fmt( $type, $_ ) for \$got, \$expect;
 
@@ -1051,7 +1051,7 @@ sub _is_diag {
 }
 
 sub _isnt_diag {
-    my( $self, $got, $type ) = @_;
+    my ( $self, $got, $type ) = @_;
 
     $self._diag_fmt( $type, \$got );
 
@@ -1079,7 +1079,7 @@ the numeric version.
 =cut
 
 sub isnt_eq {
-    my( $self, $got, $dont_expect, $name ) = @_;
+    my ( $self, $got, $dont_expect, $name ) = @_;
     local $Level = $Level + 1;
 
     if ( !defined $got || !defined $dont_expect ) {
@@ -1095,7 +1095,7 @@ sub isnt_eq {
 }
 
 sub isnt_num {
-    my( $self, $got, $dont_expect, $name ) = @_;
+    my ( $self, $got, $dont_expect, $name ) = @_;
     local $Level = $Level + 1;
 
     if ( !defined $got || !defined $dont_expect ) {
@@ -1128,14 +1128,14 @@ given C<$regex>.
 =cut
 
 sub like {
-    my( $self, $thing, $regex, $name ) = @_;
+    my ( $self, $thing, $regex, $name ) = @_;
 
     local $Level = $Level + 1;
     return $self._regex_ok( $thing, $regex, '=~', $name );
 }
 
 sub unlike {
-    my( $self, $thing, $regex, $name ) = @_;
+    my ( $self, $thing, $regex, $name ) = @_;
 
     local $Level = $Level + 1;
     return $self._regex_ok( $thing, $regex, '!~', $name );
@@ -1157,7 +1157,7 @@ my %numeric_cmps = map { ( $_, 1 ) } ( "<", "<=", ">", ">=", "==", "!=", "<=>" )
 my %cmp_ok_bl = map { ( $_, 1 ) } ( "=", "+=", ".=", "x=", "^=", "|=", "||=", "&&=", "...");
 
 sub cmp_ok {
-    my( $self, $got, $type, $expect, $name ) = @_;
+    my ( $self, $got, $type, $expect, $name ) = @_;
 
     if ($cmp_ok_bl{$type}) {
         $self.croak("$type is not a valid comparison operator in cmp_ok()");
@@ -1170,7 +1170,7 @@ sub cmp_ok {
 
         local( $@, $!, $SIG{__DIE__} );    # isolate eval
 
-        my($pack, $file, $line) = $self.caller();
+        my ($pack, $file, $line) = $self.caller();
 
         # This is so that warnings come out at the caller's level
         $succ = eval qq[
@@ -1214,7 +1214,7 @@ sub cmp_ok {
 }
 
 sub _cmp_diag {
-    my( $self, $got, $type, $expect ) = @_;
+    my ( $self, $got, $type, $expect ) = @_;
 
     $got    = defined $got    ? "'$got'"    : 'undef';
     $expect = defined $expect ? "'$expect'" : 'undef';
@@ -1230,7 +1230,7 @@ sub _cmp_diag {
 sub _caller_context {
     my $self = shift;
 
-    my( $pack, $file, $line ) = $self.caller(1);
+    my ( $pack, $file, $line ) = $self.caller(1);
 
     my $code = '';
     $code .= "#line $line $file\n" if defined $file and defined $line;
@@ -1260,7 +1260,7 @@ It will exit with 255.
 =cut
 
 sub BAIL_OUT {
-    my( $self, $reason ) = @_;
+    my ( $self, $reason ) = @_;
 
     $self.{Bailed_Out} = 1;
 
@@ -1294,7 +1294,7 @@ Skips the current test, reporting C<$why>.
 =cut
 
 sub skip {
-    my( $self, $why, $name ) = @_;
+    my ( $self, $why, $name ) = @_;
     $why ||= '';
     $name = '' unless defined $name;
     $self._unoverload_str( \$why );
@@ -1336,7 +1336,7 @@ print "not ok $tnum # TODO $why\n";
 =cut
 
 sub todo_skip {
-    my( $self, $why ) = @_;
+    my ( $self, $why ) = @_;
     $why ||= '';
 
     lock( $self.{Curr_Test} );
@@ -1416,12 +1416,12 @@ sub laconic_like {
 =cut
 
 sub maybe_regex {
-    my( $self, $regex ) = @_;
+    my ( $self, $regex ) = @_;
     my $usable_regex = undef;
 
     return $usable_regex unless defined $regex;
 
-    my( $re, $opts );
+    my ( $re, $opts );
 
     # Check for qr/foo/
     if ( _is_qr($regex) ) {
@@ -1448,7 +1448,7 @@ sub _is_qr {
 }
 
 sub _regex_ok {
-    my( $self, $thing, $regex, $cmp, $name ) = @_;
+    my ( $self, $thing, $regex, $cmp, $name ) = @_;
 
     my $ok           = 0;
     my $usable_regex = $self.maybe_regex($regex);
@@ -1503,7 +1503,7 @@ sub _regex_ok {
 =item B<_try>
 
 my $return_from_code          = $Test.try(sub { code });
-my($return_from_code, $error) = $Test.try(sub { code });
+my ($return_from_code, $error) = $Test.try(sub { code });
 
 Works like eval BLOCK except it ensures it has no effect on the rest
 of the test (ie. C<$@> is not set) nor is effected by outside
@@ -1517,7 +1517,7 @@ It is suggested you use this in place of eval BLOCK.
 =cut
 
 sub _try {
-    my( $self, $code, %opts ) = @_;
+    my ( $self, $code, %opts ) = @_;
 
     my $error;
     my $return;
@@ -1589,7 +1589,7 @@ To be polite to other functions wrapping your own you usually want to increment 
 =cut
 
 sub level {
-    my( $self, $level ) = @_;
+    my ( $self, $level ) = @_;
 
     if ( defined $level ) {
         $Level = $level;
@@ -1621,7 +1621,7 @@ Defaults to on.
 =cut
 
 sub use_numbers {
-    my( $self, $use_nums ) = @_;
+    my ( $self, $use_nums ) = @_;
 
     if ( defined $use_nums ) {
         $self.{Use_Nums} = $use_nums;
@@ -1657,7 +1657,7 @@ foreach my $attribute (qw(No_Header No_Ending No_Diag)) {
     my $method = lc $attribute;
 
     my $code = sub {
-        my( $self, $no ) = @_;
+        my ( $self, $no ) = @_;
 
         if ( defined $no ) {
             $self.{$attribute} = $no;
@@ -1735,7 +1735,7 @@ sub _diag_fh {
 }
 
 sub _print_comment {
-    my( $self, $fh, @msgs ) = @_;
+    my ( $self, $fh, @msgs ) = @_;
 
     return if $self.no_diag;
     return unless @msgs;
@@ -1806,7 +1806,7 @@ sub _print {
 }
 
 sub _print_to_fh {
-    my( $self, $fh, @msgs ) = @_;
+    my ( $self, $fh, @msgs ) = @_;
 
     # Prevent printing headers when only compiling.  Mostly for when
     # tests are deparsed with B::Deparse
@@ -1861,7 +1861,7 @@ Defaults to STDOUT.
 =cut
 
 sub output {
-    my( $self, $fh ) = @_;
+    my ( $self, $fh ) = @_;
 
     if ( defined $fh ) {
         $self.{Out_FH} = $self._new_fh($fh);
@@ -1870,7 +1870,7 @@ sub output {
 }
 
 sub failure_output {
-    my( $self, $fh ) = @_;
+    my ( $self, $fh ) = @_;
 
     if ( defined $fh ) {
         $self.{Fail_FH} = $self._new_fh($fh);
@@ -1879,7 +1879,7 @@ sub failure_output {
 }
 
 sub todo_output {
-    my( $self, $fh ) = @_;
+    my ( $self, $fh ) = @_;
 
     if ( defined $fh ) {
         $self.{Todo_FH} = $self._new_fh($fh);
@@ -1889,7 +1889,7 @@ sub todo_output {
 
 sub _new_fh {
     my $self = shift;
-    my($file_or_fh) = shift;
+    my ($file_or_fh) = shift;
 
     my $fh;
     if ( $self.is_fh($file_or_fh) ) {
@@ -1917,7 +1917,7 @@ sub _new_fh {
 }
 
 sub _autoflush {
-    my($fh) = shift;
+    my ($fh) = shift;
     my $old_fh = select $fh;
     $| = 1;
     select $old_fh;
@@ -1925,7 +1925,7 @@ sub _autoflush {
     return;
 }
 
-my( $Testout, $Testerr );
+my ( $Testout, $Testerr );
 
 sub _dup_stdhandles {
     my $self = shift;
@@ -1963,7 +1963,7 @@ sub _open_testhandles {
 }
 
 sub _copy_io_layers {
-    my( $self, $src, $dst ) = @_;
+    my ( $self, $src, $dst ) = @_;
 
     $self._try(
         sub {
@@ -2023,7 +2023,7 @@ sub _message_at_caller {
     my $self = shift;
 
     local $Level = $Level + 1;
-    my( $pack, $file, $line ) = $self.caller;
+    my ( $pack, $file, $line ) = $self.caller;
     return join( "", @_ ) . " at $file line $line.\n";
 }
 
@@ -2060,7 +2060,7 @@ can erase history if you really want to.
 =cut
 
 sub current_test {
-    my( $self, $num ) = @_;
+    my ( $self, $num ) = @_;
 
     lock( $self.{Curr_Test} );
     if ( defined $num ) {
@@ -2130,7 +2130,7 @@ Of course, test #1 is $tests[0], etc...
 =cut
 
 sub summary {
-    my($self) = shift;
+    my ($self) = shift;
 
     return map { $_.{'ok'} } @{ $self.{Test_Results} };
 }
@@ -2214,7 +2214,7 @@ what $pack to use.
 =cut
 
 sub todo {
-    my( $self, $pack ) = @_;
+    my ( $self, $pack ) = @_;
 
     return $self.{Todo} if defined $self.{Todo};
 
@@ -2241,7 +2241,7 @@ my $old_reason = $Test.find_TODO($pack, 1, $new_reason);
 =cut
 
 sub find_TODO {
-    my( $self, $pack, $set, $new_value ) = @_;
+    my ( $self, $pack, $set, $new_value ) = @_;
 
     $pack = $pack || $self.caller(1) || $self.exported_to;
     return unless $pack;
@@ -2354,8 +2354,8 @@ sub todo_end {
 =item B<caller>
 
 my $package = $Test.caller;
-my($pack, $file, $line) = $Test.caller;
-my($pack, $file, $line) = $Test.caller($height);
+my ($pack, $file, $line) = $Test.caller;
+my ($pack, $file, $line) = $Test.caller($height);
 
 Like the normal C<caller()>, except it reports according to your C<level()>.
 
@@ -2366,7 +2366,7 @@ If C<caller()> winds up off the top of the stack it report the highest context.
 =cut
 
 sub caller {    ## no critic (Subroutines::ProhibitBuiltinHomonyms)
-my( $self, $height ) = @_;
+my ( $self, $height ) = @_;
 $height ||= 0;
 
 my $level = $self.level + $height + 1;
@@ -2418,7 +2418,7 @@ a note to contact the author.
 =cut
 
 sub _whoa {
-    my( $self, $check, $desc ) = @_;
+    my ( $self, $check, $desc ) = @_;
     if ($check) {
         local $Level = $Level + 1;
         $self.croak(<<"WHOA");

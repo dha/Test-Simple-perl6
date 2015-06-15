@@ -286,7 +286,7 @@ This is the same as L<Test::Simple>'s C<ok()> routine.
 =cut
 
 sub ok ($;$) {
-    my( $test, $name ) = @_;
+    my ( $test, $name ) = @_;
     my $tb = Test::More.builder;
 
     return $tb.ok( $test, $name );
@@ -510,7 +510,7 @@ Foo.can('whatever')
 =cut
 
 sub can_ok ($@) {
-    my( $proto, @methods ) = @_;
+    my ( $proto, @methods ) = @_;
     my $class = ref $proto || $proto;
     my $tb = Test::More.builder;
 
@@ -576,7 +576,7 @@ you'd like them to be more specific, you can supply an $object_name
 =cut
 
 sub isa_ok ($$;$) {
-    my( $thing, $class, $thing_name ) = @_;
+    my ( $thing, $class, $thing_name ) = @_;
     my $tb = Test::More.builder;
 
     my $whatami;
@@ -597,7 +597,7 @@ sub isa_ok ($$;$) {
     }
 
     # We can't use UNIVERSAL::isa because we want to honor isa() overrides
-    my( $rslt, $error ) = $tb._try( sub { $thing.isa($class) } );
+    my ( $rslt, $error ) = $tb._try( sub { $thing.isa($class) } );
 
     if($error) {
         die <<WHOA unless $error =~ /^Can't (locate|call) method "isa"/;
@@ -612,7 +612,7 @@ sub isa_ok ($$;$) {
         $rslt = UNIVERSAL::isa($thing, $class);
     }
 
-    my($diag, $name);
+    my ($diag, $name);
     if( defined $thing_name ) {
         $name = "'$thing_name' isa '$class'";
         $diag = defined $thing ? "'$thing_name' isn't a '$class'" : "'$thing_name' isn't defined";
@@ -680,12 +680,12 @@ sub new_ok {
     my $tb = Test::More.builder;
     $tb.croak("new_ok() must be given at least a class") unless @_;
 
-    my( $class, $args, $object_name ) = @_;
+    my ( $class, $args, $object_name ) = @_;
 
     $args ||= [];
 
     my $obj;
-    my( $success, $error ) = $tb._try( sub { $obj = $class.new(@$args); 1 } );
+    my ( $success, $error ) = $tb._try( sub { $obj = $class.new(@$args); 1 } );
     if($success) {
         local $Test::Builder::Level = $Test::Builder::Level + 1;
         isa_ok $obj, $class, $object_name;
@@ -840,7 +840,7 @@ for my $module (@module) {
 =cut
 
 sub require_ok ($) {
-    my($module) = shift;
+    my ($module) = shift;
     my $tb = Test::More.builder;
 
     my $pack = caller;
@@ -855,7 +855,7 @@ sub require_ok ($) {
     1;
     REQUIRE
 
-    my( $eval_result, $eval_error ) = _eval($code);
+    my ( $eval_result, $eval_error ) = _eval($code);
     my $ok = $tb.ok( $eval_result, "require $module;" );
 
     unless($ok) {
@@ -934,11 +934,11 @@ BEGIN { require_ok "Foo" }
 =cut
 
 sub use_ok ($;@) {
-    my( $module, @imports ) = @_;
+    my ( $module, @imports ) = @_;
     @imports = () unless @imports;
     my $tb = Test::More.builder;
 
-    my( $pack, $filename, $line ) = caller;
+    my ( $pack, $filename, $line ) = caller;
     $filename =~ y/\n\r/_/; # so it doesn't run off the "#line $line $f" line
 
     my $code;
@@ -963,7 +963,7 @@ USE
         USE
     }
 
-    my( $eval_result, $eval_error ) = _eval( $code, \@imports );
+    my ( $eval_result, $eval_error ) = _eval( $code, \@imports );
     my $ok = $tb.ok( $eval_result, "use $module;" );
 
     unless($ok) {
@@ -981,11 +981,11 @@ USE
 }
 
 sub _eval {
-    my( $code, @args ) = @_;
+    my ( $code, @args ) = @_;
 
     # Work around oddities surrounding resetting of $@ by immediately
     # storing it.
-    my( $sigdie, $eval_result, $eval_error );
+    my ( $sigdie, $eval_result, $eval_error );
     {
         local( $@, $!, $SIG{__DIE__} );    # isolate eval
         $eval_result = eval $code;              ## no critic (BuiltinFunctions::ProhibitStringyEval)
@@ -1058,7 +1058,7 @@ sub is_deeply {
         return $tb.ok(0);
     }
 
-    my( $got, $expected, $name ) = @_;
+    my ( $got, $expected, $name ) = @_;
 
     $tb._unoverload_str( \$expected, \$got );
 
@@ -1085,7 +1085,7 @@ sub is_deeply {
 }
 
 sub _format_stack {
-    my(@Stack) = @_;
+    my (@Stack) = @_;
 
     my $var       = '$FOO';
     my $did_arrow = 0;
@@ -1288,7 +1288,7 @@ use TODO.  Read on.
 
 ## no critic (Subroutines::RequireFinalReturn)
 sub skip {
-    my( $why, $how_many ) = @_;
+    my ( $why, $how_many ) = @_;
     my $tb = Test::More.builder;
 
     unless( defined $how_many ) {
@@ -1371,7 +1371,7 @@ interpret them as passing.
 =cut
 
 sub todo_skip {
-    my( $why, $how_many ) = @_;
+    my ( $why, $how_many ) = @_;
     my $tb = Test::More.builder;
 
     unless( defined $how_many ) {
@@ -1471,7 +1471,7 @@ sub eq_array {
 }
 
 sub _eq_array {
-    my( $a1, $a2 ) = @_;
+    my ( $a1, $a2 ) = @_;
 
     if( grep _type($_) ne 'ARRAY', $a1, $a2 ) {
         warn "eq_array passed a non-array ref";
@@ -1499,7 +1499,7 @@ sub _eq_array {
 }
 
 sub _equal_nonrefs {
-    my( $e1, $e2 ) = @_;
+    my ( $e1, $e2 ) = @_;
 
     return if ref $e1 or ref $e2;
 
@@ -1514,7 +1514,7 @@ sub _equal_nonrefs {
 }
 
 sub _deep_check {
-    my( $e1, $e2 ) = @_;
+    my ( $e1, $e2 ) = @_;
     my $tb = Test::More.builder;
 
     my $ok = 0;
@@ -1593,7 +1593,7 @@ sub _deep_check {
 }
 
 sub _whoa {
-    my( $check, $desc ) = @_;
+    my ( $check, $desc ) = @_;
     if($check) {
         die <<"WHOA";
         WHOA!  $desc
@@ -1617,7 +1617,7 @@ sub eq_hash {
 }
 
 sub _eq_hash {
-    my( $a1, $a2 ) = @_;
+    my ( $a1, $a2 ) = @_;
 
     if( grep _type($_) ne 'HASH', $a1, $a2 ) {
         warn "eq_hash passed a non-hash ref";
@@ -1671,7 +1671,7 @@ L<Test::Deep> contains much better set comparison functions.
 =cut
 
 sub eq_set {
-    my( $a1, $a2 ) = @_;
+    my ( $a1, $a2 ) = @_;
     return 0 unless @$a1 == @$a2;
 
     no warnings 'uninitialized';

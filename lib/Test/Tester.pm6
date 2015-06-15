@@ -245,7 +245,7 @@ sub cmp_results
 
 ######## nicked from Test::More
 sub plan {
-	my(@plan) = @_;
+	my (@plan) = @_;
 
 	my $caller = caller;
 
@@ -254,7 +254,7 @@ sub plan {
 	my @imports = ();
 	foreach my $idx (0..$#plan) {
 		if( $plan[$idx] eq 'import' ) {
-			my($tag, $imports) = splice @plan, $idx, 2;
+			my ($tag, $imports) = splice @plan, $idx, 2;
 			@imports = @$imports;
 			last;
 		}
@@ -266,7 +266,7 @@ sub plan {
 }
 
 sub import {
-	my($class) = shift;
+	my ($class) = shift;
 		{
 			no warnings 'redefine';
 			*Test::Builder::new = \&new_new;

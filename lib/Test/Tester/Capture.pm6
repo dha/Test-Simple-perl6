@@ -38,7 +38,7 @@ class Test::Tester::Capture {
     }
 
     sub ok {
-        my($self, $test, $name) = @_;
+        my ($self, $test, $name) = @_;
 
         # $test might contain an object which we don't want to accidentally
         # store, so we turn it into a boolean.
@@ -47,7 +47,7 @@ class Test::Tester::Capture {
         lock $Curr_Test;
         $Curr_Test++;
 
-        my($pack, $file, $line) = $self.caller;
+        my ($pack, $file, $line) = $self.caller;
 
         my $todo = $self.todo($pack);
 
@@ -94,7 +94,7 @@ class Test::Tester::Capture {
         }
 
         sub skip {
-            my($self, $why) = @_;
+            my ($self, $why) = @_;
             $why ||= '';
 
             lock($Curr_Test);
@@ -118,7 +118,7 @@ class Test::Tester::Capture {
         }
 
         sub todo_skip {
-            my($self, $why) = @_;
+            my ($self, $why) = @_;
             $why ||= '';
 
             lock($Curr_Test);
@@ -143,7 +143,7 @@ class Test::Tester::Capture {
         }
 
         sub diag {
-            my($self, @msgs) = @_;
+            my ($self, @msgs) = @_;
             return unless @msgs;
 
             # Prevent printing headers when compiling (i.e. -c)

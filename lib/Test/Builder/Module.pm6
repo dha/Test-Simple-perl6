@@ -72,7 +72,7 @@ class Test::Builder::Module {
 =cut
 
 sub import {
-    my($class) = shift;
+    my ($class) = shift;
 
     # Don't run all this when loading ourself.
     return 1 if $class eq 'Test::Builder::Module';
@@ -84,7 +84,7 @@ sub import {
     $test.exported_to($caller);
 
     $class.import_extra( \@_ );
-    my(@imports) = $class._strip_imports( \@_ );
+    my (@imports) = $class._strip_imports( \@_ );
 
     $test.plan(@_);
 

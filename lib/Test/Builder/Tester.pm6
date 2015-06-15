@@ -60,7 +60,7 @@ our @EXPORT = qw(test_out test_err test_fail test_diag test_test line_num);
 
 sub import {
     my $class = shift;
-    my(@plan) = @_;
+    my (@plan) = @_;
 
     my $caller = caller;
 
@@ -217,7 +217,7 @@ sub test_fail {
     _start_testing() unless $testing;
 
     # work out what line we should be on
-    my( $package, $filename, $line ) = caller;
+    my ( $package, $filename, $line ) = caller;
     $line = $line + ( shift() || 0 );    # prevent warnings
 
     # expect that on stderr
@@ -364,7 +364,7 @@ C<line_num(+3)> idiom is arguably nicer.
 =cut
 
 sub line_num {
-    my( $package, $filename, $line ) = caller;
+    my ( $package, $filename, $line ) = caller;
     return $line + ( shift() || 0 );    # prevent warnings
 }
 
@@ -484,14 +484,14 @@ sub expect {
 }
 
 sub _account_for_subtest {
-    my( $self, $check ) = @_;
+    my ( $self, $check ) = @_;
 
     # Since we ship with Test::Builder, calling a private method is safe...ish.
     return ref($check) ? $check : $t._indent . $check;
 }
 
 sub _translate_Failed_check {
-    my( $self, $check ) = @_;
+    my ( $self, $check ) = @_;
 
     if( $check =~ /\A(.*)#     (Failed .*test) \((.*?) at line (\d+)\)\Z(?!\n)/ ) {
         $check = "/\Q$1\E#\\s+\Q$2\E.*?\\n?.*?\Qat $3\E line \Q$4\E.*\\n?/";
@@ -602,7 +602,7 @@ sub PRINT {
 }
 
 sub TIEHANDLE {
-    my( $class, $type ) = @_;
+    my ( $class, $type ) = @_;
 
     my $self = bless { type => $type }, $class;
 
