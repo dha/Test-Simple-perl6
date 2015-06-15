@@ -72,8 +72,7 @@ class Test::Builder {
 
 =head1 SYNOPSIS
 
-    class My::Test::Module {
-        use base 'Test::Builder::Module';
+    class My::Test::Module is Test::Builder::Module {
 
         my $CLASS = __PACKAGE__;
 

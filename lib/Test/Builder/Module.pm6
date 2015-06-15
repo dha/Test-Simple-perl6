@@ -17,11 +17,10 @@ class Test::Builder::Module {
 =head1 SYNOPSIS
 
     # Emulates Test::Simple
-    class Your::Module;
+    class Your::Module is Test::Builder::Module;
 
     my $CLASS = __PACKAGE__;
 
-    use base 'Test::Builder::Module';
     @EXPORT = qw(ok);
 
     sub ok ($;$) {
