@@ -1,4 +1,3 @@
-use strict;
 
 package Test::Tester::Capture;
 

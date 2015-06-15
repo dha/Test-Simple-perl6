@@ -1,5 +1,4 @@
 # $Header: /home/fergal/my/cvs/Test-Tester/lib/Test/Tester/CaptureRunner.pm,v 1.3 2003/03/05 01:07:55 fergal Exp $
-use strict;
 
 package Test::Tester::CaptureRunner;
 

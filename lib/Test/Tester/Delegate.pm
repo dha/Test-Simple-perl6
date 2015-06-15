@@ -1,6 +1,3 @@
-use strict;
-use warnings;
-
 package Test::Tester::Delegate;
 
 use vars '$AUTOLOAD';

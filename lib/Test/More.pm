@@ -1,8 +1,6 @@
 package Test::More;
 
 use 5.006;
-use strict;
-use warnings;
 
 #---- perlcritic exemptions. ----#
 

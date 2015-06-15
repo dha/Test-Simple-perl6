@@ -1,7 +1,6 @@
 package ok;
 $ok::VERSION = '0.16';
 
-use strict;
 use Test::More ();
 
 sub import {
