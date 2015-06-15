@@ -1,6 +1,6 @@
 package Test::Tester::Delegate;
 
-use vars '$AUTOLOAD';
+our $AUTOLOAD;
 
 sub new
 {

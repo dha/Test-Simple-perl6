@@ -31,7 +31,8 @@ modify it under the same terms as Perl itself.
 ##no critic
 
 use Carp;
-use vars qw($VERSION @ISA);
+our $VERSION;
+our @ISA;
 use IO::Handle;
 
 use 5.005;

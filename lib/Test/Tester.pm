@@ -15,7 +15,9 @@ use Test::Tester::Delegate;
 
 require Exporter;
 
-use vars qw( @ISA @EXPORT $VERSION );
+our @ISA;
+our @EXPORT;
+our $VERSION;
 
 $VERSION = "0.114";
 @EXPORT = qw( run_tests check_tests check_test cmp_results show_space );

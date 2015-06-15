@@ -3,7 +3,7 @@ package Test::Tester::Capture;
 
 use Test::Builder;
 
-use vars qw( @ISA );
+our @ISA;
 @ISA = qw( Test::Builder );
 
 # Make Test::Tester::Capture thread-safe for ithreads.
