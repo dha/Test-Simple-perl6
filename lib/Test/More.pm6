@@ -151,7 +151,7 @@ plan tests => keys %Stuff * 3;
     or for deciding between running the tests at all:
 
 use Test::More;
-if( $^O eq 'MacOS' ) {
+if ( $^O eq 'MacOS' ) {
     plan skip_all => 'Test irrelevant on MacOS';
 }
 else {
