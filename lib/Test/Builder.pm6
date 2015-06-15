@@ -5,11 +5,11 @@ class Test::Builder {
     our $VERSION = '1.001014';
     $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
-    BEGIN {
-        if ( $*PERL.version < 5.008 ) {
-            require Test::Builder::IO::Scalar;
-        }
-    }
+#    BEGIN {
+#        if ( $*PERL.version < 5.008 ) {
+#            require Test::Builder::IO::Scalar;
+#        }
+#    }
 
 
 # Make Test::Builder thread-safe for ithreads.
