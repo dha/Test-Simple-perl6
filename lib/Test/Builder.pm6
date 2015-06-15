@@ -70,6 +70,7 @@ class Test::Builder {
 
     Test::Builder - Backend for building test libraries
 
+=begin comment
 =head1 SYNOPSIS
 
     class My::Test::Module is Test::Builder::Module {
@@ -83,6 +84,7 @@ class Test::Builder {
             $tb->ok($test, $name);
         }
     }
+
 
 =head1 DESCRIPTION
 
@@ -112,6 +114,8 @@ If you want a completely new Test::Builder object different from the
 singleton, use C<create>.
 
 =cut
+
+=end comment
 
 our $Test = Test::Builder->new;
 
