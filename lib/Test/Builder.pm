@@ -1,4 +1,4 @@
-package Test::Builder;
+class Test::Builder;
 
 use 5.006;
 
@@ -72,7 +72,7 @@ Test::Builder - Backend for building test libraries
 
 =head1 SYNOPSIS
 
-  package My::Test::Module;
+  class My::Test::Module;
   use base 'Test::Builder::Module';
 
   my $CLASS = __PACKAGE__;

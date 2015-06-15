@@ -1,4 +1,4 @@
-package ok;
+class ok;
 $ok::VERSION = '0.16';
 
 use Test::More ();

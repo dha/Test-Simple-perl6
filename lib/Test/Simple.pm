@@ -1,4 +1,4 @@
-package Test::Simple;
+class Test::Simple;
 
 use 5.006;
 

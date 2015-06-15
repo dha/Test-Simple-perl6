@@ -1,4 +1,4 @@
-package Test::Tester::Delegate;
+class Test::Tester::Delegate;
 
 our $AUTOLOAD;
 

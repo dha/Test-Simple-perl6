@@ -1,4 +1,4 @@
-package Test::Builder::Tester;
+class Test::Builder::Tester;
 
 our $VERSION = "1.28";
 
@@ -467,7 +467,7 @@ L<Test::Builder>, L<Test::Builder::Tester::Color>, L<Test::More>.
 ####################################################################
 # Helper class that is used to remember expected and received data
 
-package Test::Builder::Tester::Tie;
+class Test::Builder::Tester::Tie;
 
 ##
 # add line(s) to be expected

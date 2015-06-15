@@ -1,4 +1,4 @@
-package Test::Builder::Tester::Color;
+class Test::Builder::Tester::Color;
 
 our $VERSION = "1.290001";
 

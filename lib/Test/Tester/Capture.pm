@@ -1,5 +1,4 @@
-
-package Test::Tester::Capture;
+class Test::Tester::Capture;
 
 use Test::Builder;
 

@@ -1,4 +1,4 @@
-package Test::More;
+class Test::More;
 
 use 5.006;
 
@@ -850,7 +850,7 @@ sub require_ok ($) {
     $module = qq['$module'] unless _is_module_name($module);
 
     my $code = <<REQUIRE;
-package $pack;
+class $pack;
 require $module;
 1;
 REQUIRE
@@ -946,7 +946,7 @@ sub use_ok ($;@) {
         # probably a version check.  Perl needs to see the bare number
         # for it to work with non-Exporter based modules.
         $code = <<USE;
-package $pack;
+class $pack;
 
 #line $line $filename
 use $module $imports[0];
@@ -955,7 +955,7 @@ USE
     }
     else {
         $code = <<USE;
-package $pack;
+class $pack;
 
 #line $line $filename
 use $module \@{\$args[0]};

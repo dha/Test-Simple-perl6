@@ -1,5 +1,4 @@
-
-package Test::Tester;
+class Test::Tester;
 
 BEGIN
 {

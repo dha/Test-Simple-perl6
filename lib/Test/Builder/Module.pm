@@ -1,4 +1,4 @@
-package Test::Builder::Module;
+class Test::Builder::Module;
 
 
 use Test::Builder 1.00;
@@ -17,7 +17,7 @@ Test::Builder::Module - Base class for test modules
 =head1 SYNOPSIS
 
   # Emulates Test::Simple
-  package Your::Module;
+  class Your::Module;
 
   my $CLASS = __PACKAGE__;
 
