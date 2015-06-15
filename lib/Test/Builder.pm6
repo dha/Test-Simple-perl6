@@ -125,6 +125,7 @@ sub new {
     return $Test;
 }
 
+=begin comment
 =item B<create>
 
 my $Test = Test::Builder.create;
@@ -138,6 +139,7 @@ still shared amongst B<all> Test::Builder objects, even ones created using
 this method.  Also, the method name may change in the future.
 
 =cut
+=end comment
 
 sub create {
     my $class = shift;
@@ -161,7 +163,7 @@ sub _copy {
     return;
 }
 
-
+=begin comment
 =item B<child>
 
 my $child = $builder.child($name_of_child);
@@ -181,6 +183,7 @@ Trying to run a test when you have an open child will also C<croak> and cause
 the test suite to fail.
 
 =cut
+=end comment
 
 sub child {
     my ( $self, $name ) = @_;
