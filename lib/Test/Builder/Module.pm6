@@ -102,7 +102,7 @@ sub _strip_imports {
     while( $idx <= $#{$list} ) {
         my $item = $list->[$idx];
 
-        if( defined $item and $item eq 'import' ) {
+        if ( defined $item and $item eq 'import' ) {
             push @imports, @{ $list->[ $idx + 1 ] };
             $idx++;
         }

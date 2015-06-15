@@ -6,7 +6,7 @@ class Test::Builder {
     $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
     BEGIN {
-        if( $*PERL.version < 5.008 ) {
+        if ( $*PERL.version < 5.008 ) {
             require Test::Builder::IO::Scalar;
         }
     }
@@ -17,7 +17,7 @@ class Test::Builder {
         use Config;
         # Load threads::shared when threads are turned on.
         # 5.8.0's threads are so busted we no longer support them.
-        if( $*PERL.version >= 5.008001 && $Config{useithreads} && $INC{'threads.pm'} ) {
+        if ( $*PERL.version >= 5.008001 && $Config{useithreads} && $INC{'threads.pm'} ) {
             require threads::shared;
 
             # Hack around YET ANOTHER threads::shared bug.  It would
@@ -27,13 +27,13 @@ class Test::Builder {
                 my $type = ref $_[0];
                 my $data;
 
-                if( $type eq 'HASH' ) {
+                if ( $type eq 'HASH' ) {
                     %$data = %{ $_[0] };
                 }
-                elsif( $type eq 'ARRAY' ) {
+                elsif ( $type eq 'ARRAY' ) {
                     @$data = @{ $_[0] };
                 }
-                elsif( $type eq 'SCALAR' ) {
+                elsif ( $type eq 'SCALAR' ) {
                     $$data = ${ $_[0] };
                 }
                 else {
@@ -42,13 +42,13 @@ class Test::Builder {
 
                 $_[0] = &threads::shared::share( $_[0] );
 
-                if( $type eq 'HASH' ) {
+                if ( $type eq 'HASH' ) {
                     %{ $_[0] } = %$data;
                 }
-                elsif( $type eq 'ARRAY' ) {
+                elsif ( $type eq 'ARRAY' ) {
                     @{ $_[0] } = @$data;
                 }
-                elsif( $type eq 'SCALAR' ) {
+                elsif ( $type eq 'SCALAR' ) {
                     ${ $_[0] } = $$data;
                 }
                 else {
@@ -182,7 +182,7 @@ the test suite to fail.
 sub child {
     my( $self, $name ) = @_;
 
-    if( $self->{Child_Name} ) {
+    if ( $self->{Child_Name} ) {
         $self->croak("You already have a child named ($self->{Child_Name}) running");
     }
 
@@ -203,7 +203,7 @@ sub child {
     }
 
     # Ensure the child understands if they're inside a TODO
-    if( $parent_in_todo ) {
+    if ( $parent_in_todo ) {
         $child->failure_output( $self->todo_output );
     }
 
@@ -261,7 +261,7 @@ sub subtest {
             1;
         };
 
-        if( !eval { $run_the_subtests->() } ) {
+        if ( !eval { $run_the_subtests->() } ) {
             $error = $@;
         }
     }
@@ -338,7 +338,7 @@ sub finalize {
     my $self = shift;
 
     return unless $self->parent;
-    if( $self->{Child_Name} ) {
+    if ( $self->{Child_Name} ) {
         $self->croak("Can't call finalize() with child ($self->{Child_Name}) active");
     }
 
@@ -371,7 +371,7 @@ sub finalize {
 sub _indent      {
     my $self = shift;
 
-    if( @_ ) {
+    if ( @_ ) {
         $self->{Indent} = shift;
     }
 
@@ -532,7 +532,7 @@ sub plan {
 
     $self->croak("You tried to plan twice") if $self->{Have_Plan};
 
-    if( my $method = $plan_cmds{$cmd} ) {
+    if ( my $method = $plan_cmds{$cmd} ) {
         local $Level = $Level + 1;
         $self->$method($arg);
     }
@@ -548,11 +548,11 @@ sub plan {
 sub _plan_tests {
     my($self, $arg) = @_;
 
-    if($arg) {
+    if ($arg) {
         local $Level = $Level + 1;
         return $self->expected_tests($arg);
     }
-    elsif( !defined $arg ) {
+    elsif ( !defined $arg ) {
         $self->croak("Got an undefined number of tests");
     }
     else {
@@ -576,7 +576,7 @@ sub expected_tests {
     my $self = shift;
     my($max) = @_;
 
-    if(@_) {
+    if (@_) {
         $self->croak("Number of tests must be a positive integer.  You gave it '$max'")
         unless $max =~ /^\+?\d+$/;
 
@@ -685,14 +685,14 @@ sub done_testing {
     my($self, $num_tests) = @_;
 
     # If done_testing() specified the number of tests, shut off no_plan.
-    if( defined $num_tests ) {
+    if ( defined $num_tests ) {
         $self->{No_Plan} = 0;
     }
     else {
         $num_tests = $self->current_test;
     }
 
-    if( $self->{Done_Testing} ) {
+    if ( $self->{Done_Testing} ) {
         my($file, $line) = @{$self->{Done_Testing}}[1,2];
         $self->ok(0, "done_testing() was already called at $file line $line");
         return;
@@ -700,7 +700,7 @@ sub done_testing {
 
     $self->{Done_Testing} = [caller];
 
-    if( $self->expected_tests && $num_tests != $self->expected_tests ) {
+    if ( $self->expected_tests && $num_tests != $self->expected_tests ) {
         $self->ok(0, "planned to run @{[ $self->expected_tests ]} ".
         "but done_testing() expects $num_tests");
     }
@@ -777,7 +777,7 @@ the last one will be honored.
 sub exported_to {
     my( $self, $pack ) = @_;
 
-    if( defined $pack ) {
+    if ( defined $pack ) {
         $self->{Exported_To} = $pack;
     }
     return $self->{Exported_To};
@@ -849,7 +849,7 @@ sub ok {
     $out .= "ok";
     $out .= " $self->{Curr_Test}" if $self->use_numbers;
 
-    if( defined $name ) {
+    if ( defined $name ) {
         $name =~ s|#|\\#|g;    # # in a name can confuse Test::Harness.
             $out .= " - $name";
             $result->{name} = $name;
@@ -858,7 +858,7 @@ sub ok {
             $result->{name} = '';
         }
 
-        if( $self->in_todo ) {
+        if ( $self->in_todo ) {
             $out .= " # TODO $todo";
             $result->{reason} = $todo;
             $result->{type}   = 'todo';
@@ -878,7 +878,7 @@ sub ok {
             $self->_print_to_fh( $self->_diag_fh, "\n" ) if $ENV{HARNESS_ACTIVE};
 
             my( undef, $file, $line ) = $self->caller;
-            if( defined $name ) {
+            if ( defined $name ) {
                 $self->diag(qq[  $msg test '$name'\n]);
                 $self->diag(qq[  at $file line $line.\n]);
             }
@@ -915,8 +915,8 @@ sub _unoverload {
     $self->_try(sub { require overload; }, die_on_fail => 1);
 
     foreach my $thing (@_) {
-        if( $self->_is_object($$thing) ) {
-            if( my $string_meth = overload::Method( $$thing, $type ) ) {
+        if ( $self->_is_object($$thing) ) {
+            if ( my $string_meth = overload::Method( $$thing, $type ) ) {
                 $$thing = $$thing->$string_meth();
             }
         }
@@ -986,7 +986,7 @@ sub is_eq {
     my( $self, $got, $expect, $name ) = @_;
     local $Level = $Level + 1;
 
-    if( !defined $got || !defined $expect ) {
+    if ( !defined $got || !defined $expect ) {
         # undef only matches undef and nothing else
         my $test = !defined $got && !defined $expect;
 
@@ -1002,7 +1002,7 @@ sub is_num {
     my( $self, $got, $expect, $name ) = @_;
     local $Level = $Level + 1;
 
-    if( !defined $got || !defined $expect ) {
+    if ( !defined $got || !defined $expect ) {
         # undef only matches undef and nothing else
         my $test = !defined $got && !defined $expect;
 
@@ -1017,8 +1017,8 @@ sub is_num {
 sub _diag_fmt {
     my( $self, $type, $val ) = @_;
 
-    if( defined $$val ) {
-        if( $type eq 'eq' or $type eq 'ne' ) {
+    if ( defined $$val ) {
+        if ( $type eq 'eq' or $type eq 'ne' ) {
             # quote and force string context
             $$val = "'$$val'";
         }
@@ -1079,7 +1079,7 @@ sub isnt_eq {
     my( $self, $got, $dont_expect, $name ) = @_;
     local $Level = $Level + 1;
 
-    if( !defined $got || !defined $dont_expect ) {
+    if ( !defined $got || !defined $dont_expect ) {
         # undef only matches undef and nothing else
         my $test = defined $got || defined $dont_expect;
 
@@ -1095,7 +1095,7 @@ sub isnt_num {
     my( $self, $got, $dont_expect, $name ) = @_;
     local $Level = $Level + 1;
 
-    if( !defined $got || !defined $dont_expect ) {
+    if ( !defined $got || !defined $dont_expect ) {
         # undef only matches undef and nothing else
         my $test = defined $got || defined $dont_expect;
 
@@ -1197,10 +1197,10 @@ sub cmp_ok {
     unless($ok) {
         $self->$unoverload( \$got, \$expect );
 
-        if( $type =~ /^(eq|==)$/ ) {
+        if ( $type =~ /^(eq|==)$/ ) {
             $self->_is_diag( $got, $type, $expect );
         }
-        elsif( $type =~ /^(ne|!=)$/ ) {
+        elsif ( $type =~ /^(ne|!=)$/ ) {
             $self->_isnt_diag( $got, $type );
         }
         else {
@@ -1421,11 +1421,11 @@ sub maybe_regex {
     my( $re, $opts );
 
     # Check for qr/foo/
-    if( _is_qr($regex) ) {
+    if ( _is_qr($regex) ) {
         $usable_regex = $regex;
     }
     # Check for '/foo/' or 'm,foo,'
-    elsif(( $re, $opts )        = $regex =~ m{^ /(.*)/ (\w*) $ }sx              or
+    elsif (( $re, $opts )        = $regex =~ m{^ /(.*)/ (\w*) $ }sx              or
     ( undef, $re, $opts ) = $regex =~ m,^ m([^\w\s]) (.+) \1 (\w*) $,sx
 )
 {
@@ -1588,7 +1588,7 @@ To be polite to other functions wrapping your own you usually want to increment 
 sub level {
     my( $self, $level ) = @_;
 
-    if( defined $level ) {
+    if ( defined $level ) {
         $Level = $level;
     }
     return $Level;
@@ -1620,7 +1620,7 @@ Defaults to on.
 sub use_numbers {
     my( $self, $use_nums ) = @_;
 
-    if( defined $use_nums ) {
+    if ( defined $use_nums ) {
         $self->{Use_Nums} = $use_nums;
     }
     return $self->{Use_Nums};
@@ -1656,7 +1656,7 @@ foreach my $attribute (qw(No_Header No_Ending No_Diag)) {
     my $code = sub {
         my( $self, $no ) = @_;
 
-        if( defined $no ) {
+        if ( defined $no ) {
             $self->{$attribute} = $no;
         }
         return $self->{$attribute};
@@ -1860,7 +1860,7 @@ Defaults to STDOUT.
 sub output {
     my( $self, $fh ) = @_;
 
-    if( defined $fh ) {
+    if ( defined $fh ) {
         $self->{Out_FH} = $self->_new_fh($fh);
     }
     return $self->{Out_FH};
@@ -1869,7 +1869,7 @@ sub output {
 sub failure_output {
     my( $self, $fh ) = @_;
 
-    if( defined $fh ) {
+    if ( defined $fh ) {
         $self->{Fail_FH} = $self->_new_fh($fh);
     }
     return $self->{Fail_FH};
@@ -1878,7 +1878,7 @@ sub failure_output {
 sub todo_output {
     my( $self, $fh ) = @_;
 
-    if( defined $fh ) {
+    if ( defined $fh ) {
         $self->{Todo_FH} = $self->_new_fh($fh);
     }
     return $self->{Todo_FH};
@@ -1889,12 +1889,12 @@ sub _new_fh {
     my($file_or_fh) = shift;
 
     my $fh;
-    if( $self->is_fh($file_or_fh) ) {
+    if ( $self->is_fh($file_or_fh) ) {
         $fh = $file_or_fh;
     }
-    elsif( ref $file_or_fh eq 'SCALAR' ) {
+    elsif ( ref $file_or_fh eq 'SCALAR' ) {
         # Scalar refs as filehandles was added in 5.8.
-        if( $*PERL.version >= 5.008 ) {
+        if ( $*PERL.version >= 5.008 ) {
             open $fh, ">>", $file_or_fh
                 or $self->croak("Can't open scalar ref $file_or_fh: $!");
         }
@@ -2060,12 +2060,12 @@ sub current_test {
     my( $self, $num ) = @_;
 
     lock( $self->{Curr_Test} );
-    if( defined $num ) {
+    if ( defined $num ) {
         $self->{Curr_Test} = $num;
 
         # If the test counter is being pushed forward fill in the details.
         my $test_results = $self->{Test_Results};
-        if( $num > @$test_results ) {
+        if ( $num > @$test_results ) {
             my $start = @$test_results ? @$test_results : 0;
             for( $start .. $num - 1 ) {
                 $test_results->[$_] = &share(
@@ -2080,7 +2080,7 @@ sub current_test {
             }
         }
         # If backward, wipe history.  Its their funeral.
-        elsif( $num < @$test_results ) {
+        elsif ( $num < @$test_results ) {
             $#{$test_results} = $num - 1;
         }
     }
@@ -2107,7 +2107,7 @@ Don't think about it too much.
 sub is_passing {
     my $self = shift;
 
-    if( @_ ) {
+    if ( @_ ) {
         $self->{Is_Passing} = shift;
     }
 
@@ -2312,7 +2312,7 @@ sub todo_start {
     my $message = @_ ? shift : '';
 
     $self->{Start_Todo}++;
-    if( $self->in_todo ) {
+    if ( $self->in_todo ) {
         push @{ $self->{Todo_Stack} } => $self->todo;
     }
     $self->{Todo} = $message;
@@ -2332,13 +2332,13 @@ preceding C<todo_start> method call.
 sub todo_end {
     my $self = shift;
 
-    if( !$self->{Start_Todo} ) {
+    if ( !$self->{Start_Todo} ) {
         $self->croak('todo_end() called without todo_start()');
     }
 
     $self->{Start_Todo}--;
 
-    if( $self->{Start_Todo} && @{ $self->{Todo_Stack} } ) {
+    if ( $self->{Start_Todo} && @{ $self->{Todo_Stack} } ) {
         $self->{Todo} = pop @{ $self->{Todo_Stack} };
     }
     else {
@@ -2416,7 +2416,7 @@ a note to contact the author.
 
 sub _whoa {
     my( $self, $check, $desc ) = @_;
-    if($check) {
+    if ($check) {
         local $Level = $Level + 1;
         $self->croak(<<"WHOA");
         WHOA!  $desc
@@ -2459,16 +2459,16 @@ sub _ending {
 
     # Don't bother with an ending if this is a forked copy.  Only the parent
     # should do the ending.
-    if( $self->{Original_Pid} != $$ ) {
+    if ( $self->{Original_Pid} != $$ ) {
         return;
     }
 
     # Ran tests but never declared a plan or hit done_testing
-    if( !$self->{Have_Plan} and $self->{Curr_Test} ) {
+    if ( !$self->{Have_Plan} and $self->{Curr_Test} ) {
         $self->is_passing(0);
         $self->diag("Tests were run but no plan was declared and done_testing() was not seen.");
 
-        if($real_exit_code) {
+        if ($real_exit_code) {
             $self->diag(<<"FAIL");
             Looks like your test exited with $real_exit_code just after $self->{Curr_Test}.
             FAIL
@@ -2478,7 +2478,7 @@ sub _ending {
 
         # But if the tests ran, handle exit code.
         my $test_results = $self->{Test_Results};
-        if(@$test_results) {
+        if (@$test_results) {
             my $num_failed = grep !$_->{'ok'}, @{$test_results}[ 0 .. $self->{Curr_Test} - 1 ];
             if ($num_failed > 0) {
 
@@ -2491,20 +2491,20 @@ sub _ending {
 
     # Exit if plan() was never called.  This is so "require Test::Simple"
     # doesn't puke.
-    if( !$self->{Have_Plan} ) {
+    if ( !$self->{Have_Plan} ) {
         return;
     }
 
     # Don't do an ending if we bailed out.
-    if( $self->{Bailed_Out} ) {
+    if ( $self->{Bailed_Out} ) {
         $self->is_passing(0);
         return;
     }
     # Figure out if we passed or failed and print helpful messages.
     my $test_results = $self->{Test_Results};
-    if(@$test_results) {
+    if (@$test_results) {
         # The plan?  We have no plan.
-        if( $self->{No_Plan} ) {
+        if ( $self->{No_Plan} ) {
             $self->_output_plan($self->{Curr_Test}) unless $self->no_header;
             $self->{Expected_Tests} = $self->{Curr_Test};
         }
@@ -2522,7 +2522,7 @@ sub _ending {
 
             my $num_extra = $self->{Curr_Test} - $self->{Expected_Tests};
 
-            if( $num_extra != 0 ) {
+            if ( $num_extra != 0 ) {
                 my $s = $self->{Expected_Tests} == 1 ? '' : 's';
                 $self->diag(<<"FAIL");
                 Looks like you planned $self->{Expected_Tests} test$s but ran $self->{Curr_Test}.
@@ -2530,7 +2530,7 @@ sub _ending {
                 $self->is_passing(0);
             }
 
-            if($num_failed) {
+            if ($num_failed) {
                 my $num_tests = $self->{Curr_Test};
                 my $s = $num_failed == 1 ? '' : 's';
 
@@ -2542,7 +2542,7 @@ sub _ending {
                 $self->is_passing(0);
             }
 
-            if($real_exit_code) {
+            if ($real_exit_code) {
                 $self->diag(<<"FAIL");
                 Looks like your test exited with $real_exit_code just after $self->{Curr_Test}.
                 FAIL
@@ -2551,10 +2551,10 @@ sub _ending {
             }
 
             my $exit_code;
-            if($num_failed) {
+            if ($num_failed) {
                 $exit_code = $num_failed <= 254 ? $num_failed : 254;
             }
-            elsif( $num_extra != 0 ) {
+            elsif ( $num_extra != 0 ) {
                 $exit_code = 255;
             }
             else {
@@ -2563,10 +2563,10 @@ sub _ending {
 
             _my_exit($exit_code) && return;
         }
-        elsif( $self->{Skip_All} ) {
+        elsif ( $self->{Skip_All} ) {
             _my_exit(0) && return;
         }
-        elsif($real_exit_code) {
+        elsif ($real_exit_code) {
             $self->diag(<<"FAIL");
             Looks like your test exited with $real_exit_code before it could output anything.
             FAIL
