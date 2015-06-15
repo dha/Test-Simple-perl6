@@ -1,21 +1,21 @@
-class ok;
-$ok::VERSION = '0.16';
+class ok {
+    $ok::VERSION = '0.16';
 
-use Test::More ();
+    use Test::More ();
 
-sub import {
-    shift;
+    sub import {
+        shift;
 
-    if (@_) {
-        goto &Test::More::pass if $_[0] eq 'ok';
-        goto &Test::More::use_ok;
+        if (@_) {
+            goto &Test::More::pass if $_[0] eq 'ok';
+            goto &Test::More::use_ok;
+        }
+
+        # No argument list - croak as if we are prototyped like use_ok()
+        my (undef, $file, $line) = caller();
+        ($file =~ /^\(eval/) or die "Not enough arguments for 'use ok' at $file line $line\n";
     }
-
-    # No argument list - croak as if we are prototyped like use_ok()
-    my (undef, $file, $line) = caller();
-    ($file =~ /^\(eval/) or die "Not enough arguments for 'use ok' at $file line $line\n";
 }
-
 
 __END__
 
