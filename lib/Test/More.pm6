@@ -11,7 +11,7 @@ class Test::More {
 # even though the module being used forgot to use Carp.  Yes, this
 # actually happened.
     sub _carp {
-        my( $file, $line ) = ( caller(1) )[ 1, 2 ];
+        my ( $file, $line ) = ( caller(1) )[ 1, 2 ];
         return warn @_, " at $file line $line\n";
     }
 
@@ -19,8 +19,8 @@ class Test::More {
     $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
     use Test::Builder::Module 0.99;
-    our @ISA    = qw(Test::Builder::Module);
-    our @EXPORT = qw(ok use_ok require_ok
+    our @ISA    = <Test::Builder::Module>;
+    our @EXPORT = <ok use_ok require_ok
     is isnt like unlike is_deeply
     cmp_ok
     skip todo todo_skip
@@ -33,7 +33,7 @@ class Test::More {
     diag note explain
     subtest
     BAIL_OUT
-);
+>;
 
 =head1 NAME
 
