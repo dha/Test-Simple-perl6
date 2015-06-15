@@ -72,18 +72,18 @@ class Test::Builder {
 
 =head1 SYNOPSIS
 
-    class My::Test::Module;
-    use base 'Test::Builder::Module';
+    class My::Test::Module {
+        use base 'Test::Builder::Module';
 
-    my $CLASS = __PACKAGE__;
+        my $CLASS = __PACKAGE__;
 
-    sub ok {
-        my($test, $name) = @_;
-        my $tb = $CLASS->builder;
+        sub ok {
+            my($test, $name) = @_;
+            my $tb = $CLASS->builder;
 
-        $tb->ok($test, $name);
+            $tb->ok($test, $name);
+        }
     }
-
 
 =head1 DESCRIPTION
 
