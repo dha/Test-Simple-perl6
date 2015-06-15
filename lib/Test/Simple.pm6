@@ -76,7 +76,7 @@ will do what you mean (fail if stuff is empty)
 =cut
 
 sub ok ($;$) {    ## no critic (Subroutines::ProhibitSubroutinePrototypes)
-    return $CLASS->builder->ok(@_);
+    return $CLASS.builder.ok(@_);
 }
 
 =back
@@ -115,17 +115,17 @@ Here's an example of a simple .t file for the fictional Film module.
 
     use Film;  # What you're testing.
 
-    my $btaste = Film->new({ Title    => 'Bad Taste',
+    my $btaste = Film.new({ Title    => 'Bad Taste',
                              Director => 'Peter Jackson',
                              Rating   => 'R',
                              NumExplodingSheep => 1
                            });
     ok( defined($btaste) && ref $btaste eq 'Film',     'new() works' );
 
-    ok( $btaste->Title      eq 'Bad Taste',     'Title() get'    );
-    ok( $btaste->Director   eq 'Peter Jackson', 'Director() get' );
-    ok( $btaste->Rating     eq 'R',             'Rating() get'   );
-    ok( $btaste->NumExplodingSheep == 1,        'NumExplodingSheep() get' );
+    ok( $btaste.Title      eq 'Bad Taste',     'Title() get'    );
+    ok( $btaste.Director   eq 'Peter Jackson', 'Director() get' );
+    ok( $btaste.Rating     eq 'R',             'Rating() get'   );
+    ok( $btaste.NumExplodingSheep == 1,        'NumExplodingSheep() get' );
 
 It will produce output like this:
 

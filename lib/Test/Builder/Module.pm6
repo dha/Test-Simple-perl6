@@ -24,8 +24,8 @@ class Test::Builder::Module {
     @EXPORT = qw(ok);
 
     sub ok ($;$) {
-        my $tb = $CLASS->builder;
-        return $tb->ok(@_);
+        my $tb = $CLASS.builder;
+        return $tb.ok(@_);
     }
 
     1;
@@ -55,7 +55,7 @@ class Test::Builder::Module {
     the plan independent of L<Test::More>.
 
     All arguments passed to C<import()> are passed onto 
-    C<< Your::Module->builder->plan() >> with the exception of 
+    C<< Your::Module.builder.plan() >> with the exception of 
     C<< import =>[qw(things to import)] >>.
 
     use Your::Module import => [qw(this that)], tests => 23;
@@ -77,18 +77,18 @@ sub import {
     # Don't run all this when loading ourself.
     return 1 if $class eq 'Test::Builder::Module';
 
-    my $test = $class->builder;
+    my $test = $class.builder;
 
     my $caller = caller;
 
-    $test->exported_to($caller);
+    $test.exported_to($caller);
 
-    $class->import_extra( \@_ );
-    my(@imports) = $class->_strip_imports( \@_ );
+    $class.import_extra( \@_ );
+    my(@imports) = $class._strip_imports( \@_ );
 
-    $test->plan(@_);
+    $test.plan(@_);
 
-    $class->export_to_level( 1, $class, @imports );
+    $class.export_to_level( 1, $class, @imports );
 }
 
 sub _strip_imports {
@@ -99,10 +99,10 @@ sub _strip_imports {
     my @other   = ();
     my $idx     = 0;
     while( $idx <= $#{$list} ) {
-        my $item = $list->[$idx];
+        my $item = $list.[$idx];
 
         if ( defined $item and $item eq 'import' ) {
-            push @imports, @{ $list->[ $idx + 1 ] };
+            push @imports, @{ $list.[ $idx + 1 ] };
             $idx++;
         }
         else {
@@ -119,7 +119,7 @@ sub _strip_imports {
 
 =head3 import_extra
 
-Your::Module->import_extra(\@import_args);
+Your::Module.import_extra(\@import_args);
 
 C<import_extra()> is called by C<import()>.  It provides an opportunity for you
 to add behaviors to your module based on its import list.
@@ -143,29 +143,29 @@ Test::Builder object.
 
 =head3 builder
 
-my $builder = Your::Class->builder;
+my $builder = Your::Class.builder;
 
 This method returns the L<Test::Builder> object associated with Your::Class.
 It is not a constructor so you can call it as often as you like.
 
 This is the preferred way to get the L<Test::Builder> object.  You should
-I<not> get it via C<< Test::Builder->new >> as was previously
+I<not> get it via C<< Test::Builder.new >> as was previously
 recommended.
 
 The object returned by C<builder()> may change at runtime so you should
 call C<builder()> inside each function rather than store it in a global.
 
 sub ok {
-    my $builder = Your::Class->builder;
+    my $builder = Your::Class.builder;
 
-    return $builder->ok(@_);
+    return $builder.ok(@_);
 }
 
 
 =cut
 
 sub builder {
-    return Test::Builder->new;
+    return Test::Builder.new;
 }
 }
 

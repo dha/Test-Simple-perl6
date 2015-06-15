@@ -18,24 +18,24 @@ sub run_tests
 
 	my $test = shift;
 
-	capture()->reset;
+	capture().reset;
 
-	$self->{StartLevel} = $Test::Builder::Level;
+	$self.{StartLevel} = $Test::Builder::Level;
 	&$test();
 }
 
 sub get_results
 {
 	my $self = shift;
-	my @results = capture()->details;
+	my @results = capture().details;
 
-	my $start = $self->{StartLevel};
+	my $start = $self.{StartLevel};
 	foreach my $res (@results)
 	{
-		next if defined $res->{depth};
-		my $depth = $res->{_depth} - $res->{_level} - $start - 3;
-#		print "my $depth = $res->{_depth} - $res->{_level} - $start - 1\n";
-		$res->{depth} = $depth;
+		next if defined $res.{depth};
+		my $depth = $res.{_depth} - $res.{_level} - $start - 3;
+#		print "my $depth = $res.{_depth} - $res.{_level} - $start - 1\n";
+		$res.{depth} = $depth;
 	}
 
 	return @results;
@@ -43,12 +43,12 @@ sub get_results
 
 sub get_premature
 {
-	return capture()->premature;
+	return capture().premature;
 }
 
 sub capture
 {
-	return Test::Tester::Capture->new;
+	return Test::Tester::Capture.new;
 }
 
 __END__

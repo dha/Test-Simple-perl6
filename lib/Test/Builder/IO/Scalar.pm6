@@ -66,11 +66,11 @@ sub new {
     my $class = ref($proto) || $proto;
     my $self = bless \do { local *FH }, $class;
     tie *$self, $class, $self;
-    $self->open(@_);   ### open on anonymous by default
+    $self.open(@_);   ### open on anonymous by default
     $self;
 }
 sub DESTROY {
-    shift->close;
+    shift.close;
 }
 
 #------------------------------
@@ -94,8 +94,8 @@ sub open {
     (ref($sref) eq "SCALAR") or croak "open() needs a ref to a scalar";
 
     ### Setup:
-    *$self->{Pos} = 0;          ### seek position
-    *$self->{SR}  = $sref;      ### scalar reference
+    *$self.{Pos} = 0;          ### seek position
+    *$self.{SR}  = $sref;      ### scalar reference
     $self;
 }
 
@@ -109,7 +109,7 @@ Is the scalar handle opened on something?
 =cut
 
 sub opened {
-    *{shift()}->{SR};
+    *{shift()}.{SR};
 }
 
 #------------------------------
@@ -167,8 +167,8 @@ sub getc {
     my $self = shift;
 
     ### Return undef right away if at EOF; else, move pos forward:
-    return undef if $self->eof;
-    substr(${*$self->{SR}}, *$self->{Pos}++, 1);
+    return undef if $self.eof;
+    substr(${*$self.{SR}}, *$self.{Pos}++, 1);
 }
 
 #------------------------------
@@ -186,11 +186,11 @@ sub getline {
     my $self = shift;
 
     ### Return undef right away if at EOF:
-    return undef if $self->eof;
+    return undef if $self.eof;
 
     ### Get next line:
-    my $sr = *$self->{SR};
-    my $i  = *$self->{Pos};	        ### Start matching at this point.
+    my $sr = *$self.{SR};
+    my $i  = *$self.{Pos};	        ### Start matching at this point.
 
     ### Minimal impact implementation!
     ### We do the fast fast thing (no regexps) if using the
@@ -198,7 +198,7 @@ sub getline {
 
     ### Case 1: $/ is undef: slurp all...
     if    (!defined($/)) {
-	*$self->{Pos} = length $$sr;
+	*$self.{Pos} = length $$sr;
         return substr($$sr, $i);
     }
 
@@ -214,12 +214,12 @@ sub getline {
         ### Extract the line:
         my $line;
         if ($i < $len) {                ### We found a "\n":
-            $line = substr ($$sr, *$self->{Pos}, $i - *$self->{Pos} + 1);
-            *$self->{Pos} = $i+1;            ### Remember where we finished up.
+            $line = substr ($$sr, *$self.{Pos}, $i - *$self.{Pos} + 1);
+            *$self.{Pos} = $i+1;            ### Remember where we finished up.
         }
         else {                          ### No "\n"; slurp the remainder:
-            $line = substr ($$sr, *$self->{Pos}, $i - *$self->{Pos});
-            *$self->{Pos} = $len;
+            $line = substr ($$sr, *$self.{Pos}, $i - *$self.{Pos});
+            *$self.{Pos} = $len;
         }
         return $line;
     }
@@ -229,9 +229,9 @@ sub getline {
     elsif (ref($/)) {
         my $len = length($$sr);
 		my $i = ${$/} + 0;
-		my $line = substr ($$sr, *$self->{Pos}, $i);
-		*$self->{Pos} += $i;
-        *$self->{Pos} = $len if (*$self->{Pos} > $len);
+		my $line = substr ($$sr, *$self.{Pos}, $i);
+		*$self.{Pos} += $i;
+        *$self.{Pos} = $len if (*$self.{Pos} > $len);
 		return $line;
     }
 
@@ -251,12 +251,12 @@ sub getline {
 	    ?  $$sr =~ m,\Q$/\E,g          ###   (ordinary sep) TBD: precomp!
             :  $$sr =~ m,\n\n,g            ###   (a paragraph)
             ) {
-            *$self->{Pos} = pos $$sr;
-            return substr($$sr, $i, *$self->{Pos}-$i);
+            *$self.{Pos} = pos $$sr;
+            return substr($$sr, $i, *$self.{Pos}-$i);
         }
         ### Else if no separator remains, just slurp the rest:
         else {
-            *$self->{Pos} = length $$sr;
+            *$self.{Pos} = length $$sr;
             return substr($$sr, $i);
         }
     }
@@ -276,7 +276,7 @@ sub getlines {
     my $self = shift;
     wantarray or croak("can't call getlines in scalar context!");
     my ($line, @lines);
-    push @lines, $line while (defined($line = $self->getline));
+    push @lines, $line while (defined($line = $self.getline));
     @lines;
 }
 
@@ -295,20 +295,20 @@ still safer to explicitly seek-to-end before subsequent print()s.
 
 sub print {
     my $self = shift;
-    *$self->{Pos} = length(${*$self->{SR}} .= join('', @_) . (defined($\) ? $\ : ""));
+    *$self.{Pos} = length(${*$self.{SR}} .= join('', @_) . (defined($\) ? $\ : ""));
     1;
 }
 sub _unsafe_print {
     my $self = shift;
     my $append = join('', @_) . $\;
-    ${*$self->{SR}} .= $append;
-    *$self->{Pos}   += length($append);
+    ${*$self.{SR}} .= $append;
+    *$self.{Pos}   += length($append);
     1;
 }
 sub _old_print {
     my $self = shift;
-    ${*$self->{SR}} .= join('', @_) . $\;
-    *$self->{Pos} = length(${*$self->{SR}});
+    ${*$self.{SR}} .= join('', @_) . $\;
+    *$self.{Pos} = length(${*$self.{SR}});
     1;
 }
 
@@ -328,9 +328,9 @@ sub read {
     my $n    = $_[2];
     my $off  = $_[3] || 0;
 
-    my $read = substr(${*$self->{SR}}, *$self->{Pos}, $n);
+    my $read = substr(${*$self.{SR}}, *$self.{Pos}, $n);
     $n = length($read);
-    *$self->{Pos} += $n;
+    *$self.{Pos} += $n;
     ($off ? substr($_[1], $off) : $_[1]) = $read;
     return $n;
 }
@@ -351,7 +351,7 @@ sub write {
 
     my $data = substr($_[1], $off, $n);
     $n = length($data);
-    $self->print($data);
+    $self.print($data);
     return $n;
 }
 
@@ -367,7 +367,7 @@ Returns the number of bytes actually read, 0 on end-of-file, undef on error.
 
 sub sysread {
   my $self = shift;
-  $self->read(@_);
+  $self.read(@_);
 }
 
 #------------------------------
@@ -381,7 +381,7 @@ Write some bytes to the scalar.
 
 sub syswrite {
   my $self = shift;
-  $self->write(@_);
+  $self.write(@_);
 }
 
 =back
@@ -440,7 +440,7 @@ I<Instance method.>  Are we at end of file?
 
 sub eof {
     my $self = shift;
-    (*$self->{Pos} >= length(${*$self->{SR}}));
+    (*$self.{Pos} >= length(${*$self.{SR}}));
 }
 
 #------------------------------
@@ -453,17 +453,17 @@ I<Instance method.>  Seek to a given position in the stream.
 
 sub seek {
     my ($self, $pos, $whence) = @_;
-    my $eofpos = length(${*$self->{SR}});
+    my $eofpos = length(${*$self.{SR}});
 
     ### Seek:
-    if    ($whence == 0) { *$self->{Pos} = $pos }             ### SEEK_SET
-    elsif ($whence == 1) { *$self->{Pos} += $pos }            ### SEEK_CUR
-    elsif ($whence == 2) { *$self->{Pos} = $eofpos + $pos}    ### SEEK_END
+    if    ($whence == 0) { *$self.{Pos} = $pos }             ### SEEK_SET
+    elsif ($whence == 1) { *$self.{Pos} += $pos }            ### SEEK_CUR
+    elsif ($whence == 2) { *$self.{Pos} = $eofpos + $pos}    ### SEEK_END
     else                 { croak "bad seek whence ($whence)" }
 
     ### Fixup:
-    if (*$self->{Pos} < 0)       { *$self->{Pos} = 0 }
-    if (*$self->{Pos} > $eofpos) { *$self->{Pos} = $eofpos }
+    if (*$self.{Pos} < 0)       { *$self.{Pos} = 0 }
+    if (*$self.{Pos} > $eofpos) { *$self.{Pos} = $eofpos }
     return 1;
 }
 
@@ -477,7 +477,7 @@ I<Instance method.> Identical to C<seek OFFSET, WHENCE>, I<q.v.>
 
 sub sysseek {
     my $self = shift;
-    $self->seek (@_);
+    $self.seek (@_);
 }
 
 #------------------------------
@@ -489,7 +489,7 @@ Return the current position in the stream, as a numeric offset.
 
 =cut
 
-sub tell { *{shift()}->{Pos} }
+sub tell { *{shift()}.{Pos} }
 
 #------------------------------
 
@@ -516,7 +516,7 @@ Set the current position, using the opaque value returned by C<getpos()>.
 
 =cut
 
-sub setpos { shift->seek($_[0],0) }
+sub setpos { shift.seek($_[0],0) }
 
 #------------------------------
 
@@ -539,7 +539,7 @@ Return a reference to the underlying scalar.
 
 =cut
 
-sub sref { *{shift()}->{SR} }
+sub sref { *{shift()}.{SR} }
 
 
 #------------------------------
@@ -550,18 +550,18 @@ sub sref { *{shift()}->{SR} }
 sub TIEHANDLE {
     ((defined($_[1]) && UNIVERSAL::isa($_[1], __PACKAGE__))
      ? $_[1]
-     : shift->new(@_));
+     : shift.new(@_));
 }
-sub GETC      { shift->getc(@_) }
-sub PRINT     { shift->print(@_) }
-sub PRINTF    { shift->print(sprintf(shift, @_)) }
-sub READ      { shift->read(@_) }
-sub READLINE  { wantarray ? shift->getlines(@_) : shift->getline(@_) }
-sub WRITE     { shift->write(@_); }
-sub CLOSE     { shift->close(@_); }
-sub SEEK      { shift->seek(@_); }
-sub TELL      { shift->tell(@_); }
-sub EOF       { shift->eof(@_); }
+sub GETC      { shift.getc(@_) }
+sub PRINT     { shift.print(@_) }
+sub PRINTF    { shift.print(sprintf(shift, @_)) }
+sub READ      { shift.read(@_) }
+sub READLINE  { wantarray ? shift.getlines(@_) : shift.getline(@_) }
+sub WRITE     { shift.write(@_); }
+sub CLOSE     { shift.close(@_); }
+sub SEEK      { shift.seek(@_); }
+sub TELL      { shift.tell(@_); }
+sub EOF       { shift.eof(@_); }
 
 #------------------------------------------------------------
 
@@ -592,7 +592,7 @@ and you see something like this...
 on an IO::Scalar with an old Perl.  The remedy is to simply
 use the OO version; e.g.:
 
-    $SH->seek(0,0);    ### GOOD: will work on any 5.005
+    $SH.seek(0,0);    ### GOOD: will work on any 5.005
     seek($SH,0,0);     ### WARNING: will only work on 5.005_57 and beyond
 
 

@@ -161,9 +161,9 @@ else {
 =cut
 
 sub plan {
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
-    return $tb->plan(@_);
+    return $tb.plan(@_);
 }
 
 # This implements "use Test::More 'no_diag'" but the behavior is
@@ -175,10 +175,10 @@ sub import_extra {
     my @other = ();
     my $idx   = 0;
     while( $idx <= $#{$list} ) {
-        my $item = $list->[$idx];
+        my $item = $list.[$idx];
 
         if( defined $item and $item eq 'no_diag' ) {
-            $class->builder->no_diag(1);
+            $class.builder.no_diag(1);
         }
         else {
             push @other, $item;
@@ -214,8 +214,8 @@ This is safer than and replaces the "no_plan" plan.
 =cut
 
 sub done_testing {
-    my $tb = Test::More->builder;
-    $tb->done_testing(@_);
+    my $tb = Test::More.builder;
+    $tb.done_testing(@_);
 }
 
 =head2 Test names
@@ -264,8 +264,8 @@ failed.  A true expression passes, a false one fails.  Very simple.
 For example:
 
 ok( $exp{9} == 81,                   'simple exponential' );
-ok( Film->can('db_Main'),            'set_db()' );
-ok( $p->tests == 4,                  'saw tests' );
+ok( Film.can('db_Main'),            'set_db()' );
+ok( $p.tests == 4,                  'saw tests' );
 ok( !grep(!defined $_, @items),      'all items defined' );
 
 (Mnemonic:  "This is ok.")
@@ -287,9 +287,9 @@ This is the same as L<Test::Simple>'s C<ok()> routine.
 
 sub ok ($;$) {
     my( $test, $name ) = @_;
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
-    return $tb->ok( $test, $name );
+    return $tb.ok( $test, $name );
 }
 
 =item B<is>
@@ -358,8 +358,8 @@ different from some other value:
 
 new_ok $obj, "Foo";
 
-my $clone = $obj->clone;
-isa_ok $obj, "Foo", "Foo->clone";
+my $clone = $obj.clone;
+isa_ok $obj, "Foo", "Foo.clone";
 
 isnt $obj, $clone, "clone() produces a different object";
 
@@ -369,15 +369,15 @@ function which is an alias of C<isnt()>.
 =cut
 
 sub is ($$;$) {
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
-    return $tb->is_eq(@_);
+    return $tb.is_eq(@_);
 }
 
 sub isnt ($$;$) {
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
-    return $tb->isnt_eq(@_);
+    return $tb.isnt_eq(@_);
 }
 
 *isn't = \&isnt;
@@ -414,9 +414,9 @@ diagnostics on failure.
 =cut
 
 sub like ($$;$) {
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
-    return $tb->like(@_);
+    return $tb.like(@_);
 }
 
 =item B<unlike>
@@ -429,9 +429,9 @@ given pattern.
 =cut
 
 sub unlike ($$;$) {
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
-    return $tb->unlike(@_);
+    return $tb.unlike(@_);
 }
 
 =item B<cmp_ok>
@@ -475,9 +475,9 @@ cmp_ok( $some_value, '<=', $upper_limit );
 =cut
 
 sub cmp_ok($$$;$) {
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
-    return $tb->cmp_ok(@_);
+    return $tb.cmp_ok(@_);
 }
 
 =item B<can_ok>
@@ -492,9 +492,9 @@ can_ok('Foo', qw(this that whatever));
 
 is almost exactly like saying:
 
-ok( Foo->can('this') && 
-Foo->can('that') && 
-Foo->can('whatever') 
+ok( Foo.can('this') && 
+Foo.can('that') && 
+Foo.can('whatever') 
       );
 
       only without all the typing and with a better interface.  Handy for
@@ -512,31 +512,31 @@ Foo->can('whatever')
 sub can_ok ($@) {
     my( $proto, @methods ) = @_;
     my $class = ref $proto || $proto;
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
     unless($class) {
-        my $ok = $tb->ok( 0, "->can(...)" );
-        $tb->diag('    can_ok() called with empty class or reference');
+        my $ok = $tb.ok( 0, ".can(...)" );
+        $tb.diag('    can_ok() called with empty class or reference');
         return $ok;
     }
 
     unless(@methods) {
-        my $ok = $tb->ok( 0, "$class->can(...)" );
-        $tb->diag('    can_ok() called with no methods');
+        my $ok = $tb.ok( 0, "$class.can(...)" );
+        $tb.diag('    can_ok() called with no methods');
         return $ok;
     }
 
     my @nok = ();
     foreach my $method (@methods) {
-        $tb->_try( sub { $proto->can($method) } ) or push @nok, $method;
+        $tb._try( sub { $proto.can($method) } ) or push @nok, $method;
     }
 
-    my $name = (@methods == 1) ? "$class->can('$methods[0]')" :
-    "$class->can(...)"           ;
+    my $name = (@methods == 1) ? "$class.can('$methods[0]')" :
+    "$class.can(...)"           ;
 
-    my $ok = $tb->ok( !@nok, $name );
+    my $ok = $tb.ok( !@nok, $name );
 
-    $tb->diag( map "    $class->can('$_') failed\n", @nok );
+    $tb.diag( map "    $class.can('$_') failed\n", @nok );
 
     return $ok;
 }
@@ -547,17 +547,17 @@ isa_ok($object,   $class, $object_name);
 isa_ok($subclass, $class, $object_name);
 isa_ok($ref,      $type,  $ref_name);
 
-Checks to see if the given C<< $object->isa($class) >>.  Also checks to make
+Checks to see if the given C<< $object.isa($class) >>.  Also checks to make
 sure the object was defined in the first place.  Handy for this sort
 of thing:
 
-my $obj = Some::Module->new;
+my $obj = Some::Module.new;
 isa_ok( $obj, 'Some::Module' );
 
 where you'd otherwise have to write
 
-my $obj = Some::Module->new;
-ok( defined $obj && $obj->isa('Some::Module') );
+my $obj = Some::Module.new;
+ok( defined $obj && $obj.isa('Some::Module') );
 
 to safeguard against your test script blowing up.
 
@@ -577,7 +577,7 @@ you'd like them to be more specific, you can supply an $object_name
 
 sub isa_ok ($$;$) {
     my( $thing, $class, $thing_name ) = @_;
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
     my $whatami;
     if( !defined $thing ) {
@@ -597,11 +597,11 @@ sub isa_ok ($$;$) {
     }
 
     # We can't use UNIVERSAL::isa because we want to honor isa() overrides
-    my( $rslt, $error ) = $tb->_try( sub { $thing->isa($class) } );
+    my( $rslt, $error ) = $tb._try( sub { $thing.isa($class) } );
 
     if($error) {
         die <<WHOA unless $error =~ /^Can't (locate|call) method "isa"/;
-        WHOA! I tried to call ->isa on your $whatami and got some weird error.
+        WHOA! I tried to call .isa on your $whatami and got some weird error.
         Here's the error.
         $error
         WHOA
@@ -645,11 +645,11 @@ sub isa_ok ($$;$) {
 
     my $ok;
     if($rslt) {
-        $ok = $tb->ok( 1, $name );
+        $ok = $tb.ok( 1, $name );
     }
     else {
-        $ok = $tb->ok( 0, $name );
-        $tb->diag("    $diag\n");
+        $ok = $tb.ok( 0, $name );
+        $tb.diag("    $diag\n");
     }
 
     return $ok;
@@ -666,7 +666,7 @@ C<isa_ok()> on that object.
 
 It is basically equivalent to:
 
-my $obj = $class->new(@args);
+my $obj = $class.new(@args);
 isa_ok $obj, $class, $object_name;
 
 If @args is not given, an empty list will be used.
@@ -677,23 +677,23 @@ just a single object which isa C<$class>.
 =cut
 
 sub new_ok {
-    my $tb = Test::More->builder;
-    $tb->croak("new_ok() must be given at least a class") unless @_;
+    my $tb = Test::More.builder;
+    $tb.croak("new_ok() must be given at least a class") unless @_;
 
     my( $class, $args, $object_name ) = @_;
 
     $args ||= [];
 
     my $obj;
-    my( $success, $error ) = $tb->_try( sub { $obj = $class->new(@$args); 1 } );
+    my( $success, $error ) = $tb._try( sub { $obj = $class.new(@$args); 1 } );
     if($success) {
         local $Test::Builder::Level = $Test::Builder::Level + 1;
         isa_ok $obj, $class, $object_name;
     }
     else {
         $class = 'undef' if !defined $class;
-        $tb->ok( 0, "$class->new() died" );
-        $tb->diag("    Error was:  $error");
+        $tb.ok( 0, "$class.new() died" );
+        $tb.diag("    Error was:  $error");
     }
 
     return $obj;
@@ -765,8 +765,8 @@ subtest 'subtest with explicit done_testing()', sub {
 sub subtest {
     my ($name, $subtests) = @_;
 
-    my $tb = Test::More->builder;
-    return $tb->subtest(@_);
+    my $tb = Test::More.builder;
+    return $tb.subtest(@_);
 }
 
 =item B<pass>
@@ -787,15 +787,15 @@ Use these very, very, very sparingly.
 =cut
 
 sub pass (;$) {
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
-    return $tb->ok( 1, @_ );
+    return $tb.ok( 1, @_ );
 }
 
 sub fail (;$) {
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
-    return $tb->ok( 0, @_ );
+    return $tb.ok( 0, @_ );
 }
 
 =back
@@ -841,7 +841,7 @@ for my $module (@module) {
 
 sub require_ok ($) {
     my($module) = shift;
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
     my $pack = caller;
 
@@ -856,11 +856,11 @@ sub require_ok ($) {
     REQUIRE
 
     my( $eval_result, $eval_error ) = _eval($code);
-    my $ok = $tb->ok( $eval_result, "require $module;" );
+    my $ok = $tb.ok( $eval_result, "require $module;" );
 
     unless($ok) {
         chomp $eval_error;
-        $tb->diag(<<DIAGNOSTIC);
+        $tb.diag(<<DIAGNOSTIC);
         Tried to require '$module'.
         Error:  $eval_error
         DIAGNOSTIC
@@ -936,7 +936,7 @@ BEGIN { require_ok "Foo" }
 sub use_ok ($;@) {
     my( $module, @imports ) = @_;
     @imports = () unless @imports;
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
     my( $pack, $filename, $line ) = caller;
     $filename =~ y/\n\r/_/; # so it doesn't run off the "#line $line $f" line
@@ -964,13 +964,13 @@ USE
     }
 
     my( $eval_result, $eval_error ) = _eval( $code, \@imports );
-    my $ok = $tb->ok( $eval_result, "use $module;" );
+    my $ok = $tb.ok( $eval_result, "use $module;" );
 
     unless($ok) {
         chomp $eval_error;
         $@ =~ s{^BEGIN failed--compilation aborted at .*$}
         {BEGIN failed--compilation aborted at $filename line $line.}m;
-        $tb->diag(<<DIAGNOSTIC);
+        $tb.diag(<<DIAGNOSTIC);
         Tried to use '$module'.
         Error:  $eval_error
         DIAGNOSTIC
@@ -1043,7 +1043,7 @@ sub _dne {
 
 ## no critic (Subroutines::RequireArgUnpacking)
 sub is_deeply {
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
     unless( @_ == 2 or @_ == 3 ) {
         my $msg = <<'WARNING';
@@ -1055,29 +1055,29 @@ sub is_deeply {
 
         _carp sprintf $msg, scalar @_;
 
-        return $tb->ok(0);
+        return $tb.ok(0);
     }
 
     my( $got, $expected, $name ) = @_;
 
-    $tb->_unoverload_str( \$expected, \$got );
+    $tb._unoverload_str( \$expected, \$got );
 
     my $ok;
     if( !ref $got and !ref $expected ) {    # neither is a reference
-        $ok = $tb->is_eq( $got, $expected, $name );
+        $ok = $tb.is_eq( $got, $expected, $name );
     }
     elsif( !ref $got xor !ref $expected ) {    # one's a reference, one isn't
-        $ok = $tb->ok( 0, $name );
-        $tb->diag( _format_stack({ vals => [ $got, $expected ] }) );
+        $ok = $tb.ok( 0, $name );
+        $tb.diag( _format_stack({ vals => [ $got, $expected ] }) );
     }
     else {                                     # both references
         local @Data_Stack = ();
         if( _deep_check( $got, $expected ) ) {
-            $ok = $tb->ok( 1, $name );
+            $ok = $tb.ok( 1, $name );
         }
         else {
-            $ok = $tb->ok( 0, $name );
-            $tb->diag( _format_stack(@Data_Stack) );
+            $ok = $tb.ok( 0, $name );
+            $tb.diag( _format_stack(@Data_Stack) );
         }
     }
 
@@ -1090,14 +1090,14 @@ sub _format_stack {
     my $var       = '$FOO';
     my $did_arrow = 0;
     foreach my $entry (@Stack) {
-        my $type = $entry->{type} || '';
-        my $idx = $entry->{'idx'};
+        my $type = $entry.{type} || '';
+        my $idx = $entry.{'idx'};
         if( $type eq 'HASH' ) {
-            $var .= "->" unless $did_arrow++;
+            $var .= "." unless $did_arrow++;
             $var .= "{$idx}";
         }
         elsif( $type eq 'ARRAY' ) {
-            $var .= "->" unless $did_arrow++;
+            $var .= "." unless $did_arrow++;
             $var .= "[$idx]";
         }
         elsif( $type eq 'REF' ) {
@@ -1195,11 +1195,11 @@ note("Tempfile is $tempfile");
 =cut
 
 sub diag {
-    return Test::More->builder->diag(@_);
+    return Test::More.builder.diag(@_);
 }
 
 sub note {
-    return Test::More->builder->note(@_);
+    return Test::More.builder.note(@_);
 }
 
 =item B<explain>
@@ -1216,12 +1216,12 @@ is_deeply($have, $want) || diag explain $have;
     or
 
 note explain \%args;
-Some::Class->method(%args);
+Some::Class.method(%args);
 
 =cut
 
 sub explain {
-    return Test::More->builder->explain(@_);
+    return Test::More.builder.explain(@_);
 }
 
 =back
@@ -1265,8 +1265,8 @@ SKIP: {
     my $lint = new HTML::Lint;
     isa_ok( $lint, "HTML::Lint" );
 
-    $lint->parse( $html );
-    is( $lint->errors, 0, "No errors found in HTML" );
+    $lint.parse( $html );
+    is( $lint.errors, 0, "No errors found in HTML" );
 }
 
 If the user does not have HTML::Lint installed, the whole block of
@@ -1289,12 +1289,12 @@ use TODO.  Read on.
 ## no critic (Subroutines::RequireFinalReturn)
 sub skip {
     my( $why, $how_many ) = @_;
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
     unless( defined $how_many ) {
         # $how_many can only be avoided when no_plan is in use.
         _carp "skip() needs to know \$how_many tests are in the block"
-        unless $tb->has_plan eq 'no_plan';
+        unless $tb.has_plan eq 'no_plan';
         $how_many = 1;
     }
 
@@ -1305,7 +1305,7 @@ sub skip {
     }
 
     for( 1 .. $how_many ) {
-        $tb->skip($why);
+        $tb.skip($why);
     }
 
     no warnings 'exiting';
@@ -1327,10 +1327,10 @@ TODO: {
     local $TODO = "URI::Geller not finished";
 
     my $card = "Eight of clubs";
-    is( URI::Geller->your_card, $card, 'Is THIS your card?' );
+    is( URI::Geller.your_card, $card, 'Is THIS your card?' );
 
     my $spoon;
-    URI::Geller->bend_spoon;
+    URI::Geller.bend_spoon;
     is( $spoon, 'bent',    "Spoon bending, that's original" );
 }
 
@@ -1372,17 +1372,17 @@ interpret them as passing.
 
 sub todo_skip {
     my( $why, $how_many ) = @_;
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
     unless( defined $how_many ) {
         # $how_many can only be avoided when no_plan is in use.
         _carp "todo_skip() needs to know \$how_many tests are in the block"
-        unless $tb->has_plan eq 'no_plan';
+        unless $tb.has_plan eq 'no_plan';
         $how_many = 1;
     }
 
     for( 1 .. $how_many ) {
-        $tb->todo_skip($why);
+        $tb.todo_skip($why);
     }
 
     no warnings 'exiting';
@@ -1427,9 +1427,9 @@ For even better control look at L<Test::Most>.
 
 sub BAIL_OUT {
     my $reason = shift;
-    my $tb     = Test::More->builder;
+    my $tb     = Test::More.builder;
 
-    $tb->BAIL_OUT($reason);
+    $tb.BAIL_OUT($reason);
 }
 
 =back
@@ -1483,8 +1483,8 @@ sub _eq_array {
     my $ok = 1;
     my $max = $#$a1 > $#$a2 ? $#$a1 : $#$a2;
     for( 0 .. $max ) {
-        my $e1 = $_ > $#$a1 ? $DNE : $a1->[$_];
-        my $e2 = $_ > $#$a2 ? $DNE : $a2->[$_];
+        my $e1 = $_ > $#$a1 ? $DNE : $a1.[$_];
+        my $e2 = $_ > $#$a2 ? $DNE : $a2.[$_];
 
         next if _equal_nonrefs($e1, $e2);
 
@@ -1515,7 +1515,7 @@ sub _equal_nonrefs {
 
 sub _deep_check {
     my( $e1, $e2 ) = @_;
-    my $tb = Test::More->builder;
+    my $tb = Test::More.builder;
 
     my $ok = 0;
 
@@ -1525,7 +1525,7 @@ sub _deep_check {
     local %Refs_Seen = %Refs_Seen;
 
     {
-        $tb->_unoverload_str( \$e1, \$e2 );
+        $tb._unoverload_str( \$e1, \$e2 );
 
         # Either they're both references or both not.
         my $same_ref = !( !ref $e1 xor !ref $e2 );
@@ -1629,8 +1629,8 @@ sub _eq_hash {
     my $ok = 1;
     my $bigger = keys %$a1 > keys %$a2 ? $a1 : $a2;
     foreach my $k ( keys %$bigger ) {
-        my $e1 = exists $a1->{$k} ? $a1->{$k} : $DNE;
-        my $e2 = exists $a2->{$k} ? $a2->{$k} : $DNE;
+        my $e1 = exists $a1.{$k} ? $a1.{$k} : $DNE;
+        my $e2 = exists $a2.{$k} ? $a2.{$k} : $DNE;
 
         next if _equal_nonrefs($e1, $e2);
 
@@ -1712,7 +1712,7 @@ you can access the underlying L<Test::Builder> object like so:
 
 =item B<builder>
 
-my $test_builder = Test::More->builder;
+my $test_builder = Test::More.builder;
 
 Returns the L<Test::Builder> object underlying Test::More for you to play
 with.
@@ -1801,10 +1801,10 @@ use Test::More;
 A more direct work around is to change the filehandles used by
 L<Test::Builder>.
 
-my $builder = Test::More->builder;
-binmode $builder->output,         ":encoding(utf8)";
-binmode $builder->failure_output, ":encoding(utf8)";
-binmode $builder->todo_output,    ":encoding(utf8)";
+my $builder = Test::More.builder;
+binmode $builder.output,         ":encoding(utf8)";
+binmode $builder.failure_output, ":encoding(utf8)";
+binmode $builder.todo_output,    ":encoding(utf8)";
 
 
 =item Overloaded objects

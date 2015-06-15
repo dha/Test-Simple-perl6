@@ -10,7 +10,7 @@ class Test::Tester::Capture {
 #	use Config;
 #	if( $] >= 5.008 && $Config{useithreads} ) {
 #		require threads::shared;
-#		threads::shared->import;
+#		threads::shared.import;
 #	}
 #	else {
 #		*share = sub { 0 };
@@ -47,9 +47,9 @@ class Test::Tester::Capture {
         lock $Curr_Test;
         $Curr_Test++;
 
-        my($pack, $file, $line) = $self->caller;
+        my($pack, $file, $line) = $self.caller;
 
-        my $todo = $self->todo($pack);
+        my $todo = $self.todo($pack);
 
         my $result = {};
         share($result);
@@ -63,32 +63,32 @@ class Test::Tester::Capture {
 
         if( defined $name ) {
             $name =~ s|#|\\#|g;	 # # in a name can confuse Test::Harness.
-                $result->{name} = $name;
+                $result.{name} = $name;
             }
             else {
-                $result->{name} = '';
+                $result.{name} = '';
             }
 
             if( $todo ) {
                 my $what_todo = $todo;
-                $result->{reason} = $what_todo;
-                $result->{type}   = 'todo';
+                $result.{reason} = $what_todo;
+                $result.{type}   = 'todo';
             }
             else {
-                $result->{reason} = '';
-                $result->{type}   = '';
+                $result.{reason} = '';
+                $result.{type}   = '';
             }
 
             $Test_Results[$Curr_Test-1] = $result;
 
             unless( $test ) {
                 my $msg = $todo ? "Failed (TODO)" : "Failed";
-                $result->{fail_diag} = ("	$msg test ($file at line $line)\n");
+                $result.{fail_diag} = ("	$msg test ($file at line $line)\n");
             } 
 
-            $result->{diag} = "";
-            $result->{_level} = $Test::Builder::Level;
-            $result->{_depth} = Test::Tester::find_run_tests();
+            $result.{diag} = "";
+            $result.{_level} = $Test::Builder::Level;
+            $result.{_depth} = Test::Tester::find_run_tests();
 
             return $test ? 1 : 0;
         }
@@ -158,7 +158,7 @@ class Test::Tester::Capture {
 
             my $result = $Curr_Test ? $Test_Results[$Curr_Test - 1] : $Prem_Diag;
 
-            $result->{diag} .= join("", @msgs);
+            $result.{diag} .= join("", @msgs);
 
             return 0;
         }
@@ -178,7 +178,7 @@ class Test::Tester::Capture {
 
         sub premature
         {
-            return $Prem_Diag->{diag};
+            return $Prem_Diag.{diag};
         }
 
         sub current_test

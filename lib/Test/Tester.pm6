@@ -22,12 +22,12 @@ $VERSION = "0.114";
 @EXPORT = qw( run_tests check_tests check_test cmp_results show_space );
 @ISA = qw( Exporter );
 
-my $Test = Test::Builder->new;
-my $Capture = Test::Tester::Capture->new;
-my $Delegator = Test::Tester::Delegate->new;
-$Delegator->{Object} = $Test;
+my $Test = Test::Builder.new;
+my $Capture = Test::Tester::Capture.new;
+my $Delegator = Test::Tester::Delegate.new;
+$Delegator.{Object} = $Test;
 
-my $runner = Test::Tester::CaptureRunner->new;
+my $runner = Test::Tester::CaptureRunner.new;
 
 my $want_space = $ENV{TESTTESTERSPACE};
 
@@ -57,13 +57,13 @@ sub new_new
 
 sub capture
 {
-	return Test::Tester::Capture->new;
+	return Test::Tester::Capture.new;
 }
 
 sub fh
 {
 	# experiment with capturing output, I don't like it
-	$runner = Test::Tester::FHRunner->new;
+	$runner = Test::Tester::FHRunner.new;
 
 	return $Test;
 }
@@ -85,11 +85,11 @@ sub find_run_tests
 
 sub run_tests
 {
-	local($Delegator->{Object}) = $Capture;
+	local($Delegator.{Object}) = $Capture;
 
-	$runner->run_tests(@_);
+	$runner.run_tests(@_);
 
-	return ($runner->get_premature, $runner->get_results);
+	return ($runner.get_premature, $runner.get_results);
 }
 
 sub check_test
@@ -112,9 +112,9 @@ sub check_tests
 
 	my ($prem, @results) = eval { run_tests($test, $name) };
 
-	$Test->ok(! $@, "Test '$name' completed") || $Test->diag($@);
-	$Test->ok(! length($prem), "Test '$name' no premature diagnostication") ||
-		$Test->diag("Before any testing anything, your tests said\n$prem");
+	$Test.ok(! $@, "Test '$name' completed") || $Test.diag($@);
+	$Test.ok(! length($prem), "Test '$name' no premature diagnostication") ||
+		$Test.diag("Before any testing anything, your tests said\n$prem");
 
 	local $Test::Builder::Level = $Test::Builder::Level + 1;
 	cmp_results(\@results, $expects, $name);
@@ -125,9 +125,9 @@ sub cmp_field
 {
 	my ($result, $expect, $field, $desc) = @_;
 
-	if (defined $expect->{$field})
+	if (defined $expect.{$field})
 	{
-		$Test->is_eq($result->{$field}, $expect->{$field},
+		$Test.is_eq($result.{$field}, $expect.{$field},
 			"$desc compare $field");
 	}
 }
@@ -136,7 +136,7 @@ sub cmp_result
 {
 	my ($result, $expect, $name) = @_;
 
-	my $sub_name = $result->{name};
+	my $sub_name = $result.{name};
 	$sub_name = "" unless defined($name);
 
 	my $desc = "subtest '$sub_name' of '$name'";
@@ -157,29 +157,29 @@ sub cmp_result
 
 	# if we got no depth then default to 1
 	my $depth = 1;
-	if (exists $expect->{depth})
+	if (exists $expect.{depth})
 	{
-		$depth = $expect->{depth};
+		$depth = $expect.{depth};
 	}
 
 	# if depth was explicitly undef then don't test it
 	if (defined $depth)
 	{
-		$Test->is_eq($result->{depth}, $depth, "checking depth") ||
-			$Test->diag('You need to change $Test::Builder::Level');
+		$Test.is_eq($result.{depth}, $depth, "checking depth") ||
+			$Test.diag('You need to change $Test::Builder::Level');
 	}
 
-	if (defined(my $exp = $expect->{diag}))
+	if (defined(my $exp = $expect.{diag}))
 	{
 		# if there actually is some diag then put a \n on the end if it's not
 		# there already
 
 		$exp .= "\n" if (length($exp) and $exp !~ /\n$/);
-		if (not $Test->ok($result->{diag} eq $exp,
+		if (not $Test.ok($result.{diag} eq $exp,
 			"subtest '$sub_name' of '$name' compare diag")
 		)
 		{
-			my $got = $result->{diag};
+			my $got = $result.{diag};
 			my $glen = length($got);
 			my $elen = length($exp);
 			for ($got, $exp)
@@ -197,7 +197,7 @@ sub cmp_result
 				} @lines);
 			}
 
-			$Test->diag(<<EOM);
+			$Test.diag(<<EOM);
 Got diag ($glen bytes):
 $got
 Expected diag ($elen bytes):
@@ -231,12 +231,12 @@ sub cmp_results
 {
 	my ($results, $expects, $name) = @_;
 
-	$Test->is_num(scalar @$results, scalar @$expects, "Test '$name' result count");
+	$Test.is_num(scalar @$results, scalar @$expects, "Test '$name' result count");
 
 	for (my $i = 0; $i < @$expects; $i++)
 	{
-		my $expect = $expects->[$i];
-		my $result = $results->[$i];
+		my $expect = $expects.[$i];
+		my $result = $results.[$i];
 
 		local $Test::Builder::Level = $Test::Builder::Level + 1;
 		cmp_result($result, $expect, $name);
@@ -249,7 +249,7 @@ sub plan {
 
 	my $caller = caller;
 
-	$Test->exported_to($caller);
+	$Test.exported_to($caller);
 
 	my @imports = ();
 	foreach my $idx (0..$#plan) {
@@ -260,9 +260,9 @@ sub plan {
 		}
 	}
 
-	$Test->plan(@plan);
+	$Test.plan(@plan);
 
-	__PACKAGE__->_export_to_level(1, __PACKAGE__, @imports);
+	__PACKAGE__._export_to_level(1, __PACKAGE__, @imports);
 }
 
 sub import {
@@ -280,7 +280,7 @@ sub _export_to_level
 	my $level = shift;
 	(undef) = shift;	# redundant arg
 	my $callpkg = caller($level);
-	$pkg->export($callpkg, @_);
+	$pkg.export($callpkg, @_);
 }
 
 
@@ -326,7 +326,7 @@ or
 
   # now use Test::More::like to check the diagnostic output
 
-  like($results[0]->{diag}, "/^Database ping took \\d+ seconds$"/, "diag");
+  like($results[0].{diag}, "/^Database ping took \\d+ seconds$"/, "diag");
 
 =head1 DESCRIPTION
 
@@ -374,7 +374,7 @@ you can get direct access to the test results:
     }
   );
 
-  like($result[0]->{diag}, "/^Database ping took \\d+ seconds$"/, "diag");
+  like($result[0].{diag}, "/^Database ping took \\d+ seconds$"/, "diag");
 
 
 We cannot predict how long the database ping will take so we use
@@ -397,14 +397,14 @@ routines access it through $Test then providing a function something like this
 
 should allow your test scripts to do
 
-  Test::YourModule::set_builder(Test::Tester->capture);
+  Test::YourModule::set_builder(Test::Tester.capture);
 
 and after that any tests inside your module will captured.
 
 =head1 TEST RESULTS
 
 The result of each test is captured in a hash. These hashes are the same as
-the hashes returned by Test::Builder->details but with a couple of extra
+the hashes returned by Test::Builder.details but with a couple of extra
 fields.
 
 These fields are documented in L<Test::Builder> in the details() function
@@ -418,7 +418,7 @@ Did the test pass?
 =item actual_ok
 
 Did the test really pass? That is, did the pass come from
-Test::Builder->ok() or did it pass because it was a TODO test?
+Test::Builder.ok() or did it pass because it was a TODO test?
 
 =item name
 
@@ -482,7 +482,7 @@ signal handler or an END block or anywhere else that hides the call stack.
 =back
 
 Some of Test::Tester's functions return arrays of these hashes, just
-like Test::Builder->details. That is, the hash for the first test will
+like Test::Builder.details. That is, the hash for the first test will
 be array element 1 (not 0). Element 0 will not be a hash it will be a
 string which contains any diagnostic output that came before the first
 test. This should usually be empty, if it's not, it means something
@@ -604,7 +604,7 @@ section.
 =head1 HOW IT WORKS
 
 Normally, a test module (let's call it Test:MyStyle) calls
-Test::Builder->new to get the Test::Builder object. Test::MyStyle calls
+Test::Builder.new to get the Test::Builder object. Test::MyStyle calls
 methods on this object to record information about test results. When
 Test::Tester is loaded, it replaces Test::Builder's new() method with one
 which returns a Test::Tester::Delegate object. Most of the time this object
@@ -618,7 +618,7 @@ all the information for later analysis.
 
 =head1 CAVEATS
 
-Support for calling Test::Builder->note is minimal. It's implemented
+Support for calling Test::Builder.note is minimal. It's implemented
 as an empty stub, so modules that use it will not crash but the calls
 are not recorded for testing purposes like the others. Patches
 welcome.

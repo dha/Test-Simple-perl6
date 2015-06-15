@@ -47,7 +47,7 @@ output.
 # set up testing
 ####
 
-my $t = Test::Builder->new;
+my $t = Test::Builder.new;
 
 ###
 # make us an exporter
@@ -64,8 +64,8 @@ sub import {
 
     my $caller = caller;
 
-    $t->exported_to($caller);
-    $t->plan(@plan);
+    $t.exported_to($caller);
+    $t.plan(@plan);
 
     my @imports = ();
     foreach my $idx ( 0 .. $#plan ) {
@@ -75,7 +75,7 @@ sub import {
         }
     }
 
-    __PACKAGE__->export_to_level( 1, __PACKAGE__, @imports );
+    __PACKAGE__.export_to_level( 1, __PACKAGE__, @imports );
 }
 
 ###
@@ -114,28 +114,28 @@ sub _start_testing {
     $ENV{HARNESS_ACTIVE} = 0;
 
     # remember what the handles were set to
-    $original_output_handle  = $t->output();
-    $original_failure_handle = $t->failure_output();
-    $original_todo_handle    = $t->todo_output();
+    $original_output_handle  = $t.output();
+    $original_failure_handle = $t.failure_output();
+    $original_todo_handle    = $t.todo_output();
 
     # switch out to our own handles
-    $t->output($output_handle);
-    $t->failure_output($error_handle);
-    $t->todo_output($output_handle);
+    $t.output($output_handle);
+    $t.failure_output($error_handle);
+    $t.todo_output($output_handle);
 
     # clear the expected list
-    $out->reset();
-    $err->reset();
+    $out.reset();
+    $err.reset();
 
     # remember that we're testing
     $testing     = 1;
-    $testing_num = $t->current_test;
-    $t->current_test(0);
-    $original_is_passing  = $t->is_passing;
-    $t->is_passing(1);
+    $testing_num = $t.current_test;
+    $t.current_test(0);
+    $original_is_passing  = $t.is_passing;
+    $t.is_passing(1);
 
     # look, we shouldn't do the ending stuff
-    $t->no_ending(1);
+    $t.no_ending(1);
 }
 
 =head2 Functions
@@ -176,14 +176,14 @@ sub test_out {
     # do we need to do any setup?
     _start_testing() unless $testing;
 
-    $out->expect(@_);
+    $out.expect(@_);
 }
 
 sub test_err {
     # do we need to do any setup?
     _start_testing() unless $testing;
 
-    $err->expect(@_);
+    $err.expect(@_);
 }
 
 =item test_fail
@@ -221,7 +221,7 @@ sub test_fail {
     $line = $line + ( shift() || 0 );    # prevent warnings
 
     # expect that on stderr
-    $err->expect("#     Failed test ($filename at line $line)");
+    $err.expect("#     Failed test ($filename at line $line)");
 }
 
 =item test_diag
@@ -244,7 +244,7 @@ you can write
 Remember that L<Test::Builder>'s diag function will not add newlines to
 the end of output and test_diag will. So to check
 
-   Test::Builder->new->diag("foo\n","bar\n");
+   Test::Builder.new.diag("foo\n","bar\n");
 
 You would do
 
@@ -260,7 +260,7 @@ sub test_diag {
 
     # expect the same thing, but prepended with "#     "
     local $_;
-    $err->expect( map { "# $_" } @_ );
+    $err.expect( map { "# $_" } @_ );
 }
 
 =item test_test
@@ -321,21 +321,21 @@ sub test_test {
       unless $testing;
 
     # okay, reconnect the test suite back to the saved handles
-    $t->output($original_output_handle);
-    $t->failure_output($original_failure_handle);
-    $t->todo_output($original_todo_handle);
+    $t.output($original_output_handle);
+    $t.failure_output($original_failure_handle);
+    $t.todo_output($original_todo_handle);
 
     # restore the test no, etc, back to the original point
-    $t->current_test($testing_num);
+    $t.current_test($testing_num);
     $testing = 0;
-    $t->is_passing($original_is_passing);
+    $t.is_passing($original_is_passing);
 
     # re-enable the original setting of the harness
     $ENV{HARNESS_ACTIVE} = $original_harness_env;
 
     # check the output we've stashed
-    unless( $t->ok( ( $args{skip_out} || $out->check ) &&
-                    ( $args{skip_err} || $err->check ), $mess ) 
+    unless( $t.ok( ( $args{skip_out} || $out.check ) &&
+                    ( $args{skip_err} || $err.check ), $mess ) 
     )
     {
         # print out the diagnostic information about why this
@@ -343,11 +343,11 @@ sub test_test {
 
         local $_;
 
-        $t->diag( map { "$_\n" } $out->complaint )
-          unless $args{skip_out} || $out->check;
+        $t.diag( map { "$_\n" } $out.complaint )
+          unless $args{skip_out} || $out.check;
 
-        $t->diag( map { "$_\n" } $err->complaint )
-          unless $args{skip_err} || $err->check;
+        $t.diag( map { "$_\n" } $err.complaint )
+          unless $args{skip_err} || $err.check;
     }
 }
 
@@ -419,7 +419,7 @@ sub color {
 
 =head1 BUGS
 
-Calls C<< Test::Builder->no_ending >> turning off the ending tests.
+Calls C<< Test::Builder.no_ending >> turning off the ending tests.
 This is needed as otherwise it will trip out because we've run more
 tests than we strictly should have and it'll register any failures we
 had that we were testing for as real failures.
@@ -477,9 +477,9 @@ sub expect {
 
     my @checks = @_;
     foreach my $check (@checks) {
-        $check = $self->_account_for_subtest($check);
-        $check = $self->_translate_Failed_check($check);
-        push @{ $self->{wanted} }, ref $check ? $check : "$check\n";
+        $check = $self._account_for_subtest($check);
+        $check = $self._translate_Failed_check($check);
+        push @{ $self.{wanted} }, ref $check ? $check : "$check\n";
     }
 }
 
@@ -487,7 +487,7 @@ sub _account_for_subtest {
     my( $self, $check ) = @_;
 
     # Since we ship with Test::Builder, calling a private method is safe...ish.
-    return ref($check) ? $check : $t->_indent . $check;
+    return ref($check) ? $check : $t._indent . $check;
 }
 
 sub _translate_Failed_check {
@@ -509,8 +509,8 @@ sub check {
     # turn off warnings as these might be undef
     local $^W = 0;
 
-    my @checks = @{ $self->{wanted} };
-    my $got    = $self->{got};
+    my @checks = @{ $self.{wanted} };
+    my $got    = $self.{got};
     foreach my $check (@checks) {
         $check = "\Q$check\E" unless( $check =~ s,^/(.*)/$,$1, or ref $check );
         return 0 unless $got =~ s/^$check//;
@@ -525,9 +525,9 @@ sub check {
 
 sub complaint {
     my $self   = shift;
-    my $type   = $self->type;
-    my $got    = $self->got;
-    my $wanted = join '', @{ $self->wanted };
+    my $type   = $self.type;
+    my $got    = $self.got;
+    my $wanted = join '', @{ $self.wanted };
 
     # are we running in colour mode?
     if(Test::Builder::Tester::color) {
@@ -571,7 +571,7 @@ sub complaint {
 sub reset {
     my $self = shift;
     %$self = (
-        type   => $self->{type},
+        type   => $self.{type},
         got    => '',
         wanted => [],
     );
@@ -579,17 +579,17 @@ sub reset {
 
 sub got {
     my $self = shift;
-    return $self->{got};
+    return $self.{got};
 }
 
 sub wanted {
     my $self = shift;
-    return $self->{wanted};
+    return $self.{wanted};
 }
 
 sub type {
     my $self = shift;
-    return $self->{type};
+    return $self.{type};
 }
 
 ###
@@ -598,7 +598,7 @@ sub type {
 
 sub PRINT {
     my $self = shift;
-    $self->{got} .= join '', @_;
+    $self.{got} .= join '', @_;
 }
 
 sub TIEHANDLE {
@@ -606,7 +606,7 @@ sub TIEHANDLE {
 
     my $self = bless { type => $type }, $class;
 
-    $self->reset;
+    $self.reset;
 
     return $self;
 }
