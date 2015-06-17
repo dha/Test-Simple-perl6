@@ -12,7 +12,7 @@ class ok {
         }
 
         # No argument list - croak as if we are prototyped like use_ok()
-        my ( $file, $line ) = callframe(1).annotations<file line>;
+        my ( $file, $line ) = callframe().annotations<file line>;
         ($file =~ /^\(eval/) or die "Not enough arguments for 'use ok' at $file line $line\n";
     }
 }
