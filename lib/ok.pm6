@@ -3,11 +3,11 @@ class ok {
 
     use Test::More ();
 
-    sub import {
-        shift;
+    sub import (*@args) {
+        @args.shift;
 
-        if (@_) {
-            goto &Test::More::pass if $_[0] eq 'ok';
+        if (@args) {
+            goto &Test::More::pass if @args[0] eq 'ok';
             goto &Test::More::use_ok;
         }
 
