@@ -12,7 +12,8 @@ class ok {
         }
 
         # No argument list - croak as if we are prototyped like use_ok()
-        my (undef, $file, $line) = caller();
+        my $file = callframe(1).file;
+        my $line = callframe(1).line;
         ($file =~ /^\(eval/) or die "Not enough arguments for 'use ok' at $file line $line\n";
     }
 }
