@@ -11,7 +11,7 @@ class Test::More {
 # even though the module being used forgot to use Carp.  Yes, this
 # actually happened.
     sub _carp {
-        my ( $file, $line ) = ( caller(1) )[ 1, 2 ];
+        my ( $file, $line ) = ( callframe(1).annotations<file line> );
         return warn @_, " at $file line $line\n";
     }
 

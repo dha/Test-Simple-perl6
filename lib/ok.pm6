@@ -3,17 +3,16 @@ class ok {
 
     use Test::More ();
 
-    sub import (*@args) {
-        @args.shift;
+    sub import {
+        @_.shift;
 
-        if (@args) {
-            goto &Test::More::pass if @args[0] eq 'ok';
+        if (@_) {
+            goto &Test::More::pass if @_[0] eq 'ok';
             goto &Test::More::use_ok;
         }
 
         # No argument list - croak as if we are prototyped like use_ok()
-        my $file = callframe(1).file;
-        my $line = callframe(1).line;
+        my ( $file, $line ) = callframe(1).annotations<file line>;
         ($file =~ /^\(eval/) or die "Not enough arguments for 'use ok' at $file line $line\n";
     }
 }
