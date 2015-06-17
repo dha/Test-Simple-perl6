@@ -120,7 +120,7 @@ singleton, use C<create>.
 our $Test = Test::Builder.new;
 
 sub new {
-    my ($class) = shift;
+    my ($class) = @_.shift;
     $Test ||= $class.create;
     return $Test;
 }
@@ -142,7 +142,7 @@ this method.  Also, the method name may change in the future.
 =end comment
 
 sub create {
-    my $class = shift;
+    my $class = @_.shift;
 
     my $self = bless {}, $class;
     $self.reset;
@@ -237,7 +237,7 @@ subtests reference.
 =cut
 
 sub subtest {
-    my $self = shift;
+    my $self = @_.shift;
     my ($name, $subtests, @args) = @_;
 
     if ('CODE' ne ref $subtests) {
@@ -316,7 +316,7 @@ if the developer has not set a plan.
 =cut
 
 sub _plan_handled {
-    my $self = shift;
+    my $self = @_.shift;
     return $self.{Have_Plan} || $self.{No_Plan} || $self.{Skip_All};
 }
 
@@ -341,7 +341,7 @@ Calling this on the root builder is a no-op.
 =cut
 
 sub finalize {
-    my $self = shift;
+    my $self = @_.shift;
 
     return unless $self.parent;
     if ( $self.{Child_Name} ) {
@@ -352,7 +352,7 @@ sub finalize {
     $self._ending;
 
     # XXX This will only be necessary for TAP envelopes (we think)
-    #$self._print( $self.is_passing ? "PASS\n" : "FAIL\n" );
+    #$self._print( $self.is_passing ?? "PASS\n" !! "FAIL\n" );
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my $ok = 1;
@@ -375,10 +375,10 @@ sub finalize {
 }
 
 sub _indent      {
-    my $self = shift;
+    my $self = @_.shift;
 
     if ( @_ ) {
-        $self.{Indent} = shift;
+        $self.{Indent} = @_.shift;
     }
 
     return $self.{Indent};
@@ -395,7 +395,7 @@ builders for nested TAP.
 
 =cut
 
-sub parent { shift.{Parent} }
+sub parent { @_.shift.{Parent} }
 
 =item B<name>
 
@@ -407,10 +407,10 @@ method.  If no name is supplied, will be named "Child of $parent.name".
 
 =cut
 
-sub name { shift.{Name} }
+sub name { @_.shift.{Name} }
 
 sub DESTROY {
-    my $self = shift;
+    my $self = @_.shift;
     if ( $self.parent and $$ == $self.{Original_Pid} ) {
         my $name = $self.name;
         $self.diag(<<"FAIL");
@@ -481,7 +481,7 @@ return;
 # a separate method to restore them.
 # Shared references are retained across copies.
 sub _share_keys {
-    my $self = shift;
+    my $self = @_.shift;
 
     share( $self.{Curr_Test} );
 
@@ -514,7 +514,7 @@ thrown.  Trap this error, call C<finalize()> and don't run any more tests on
 the child.
 
 my $child = $Test.child('some child');
-eval { $child.plan( $condition ? ( skip_all => $reason ) : ( tests => 3 )  ) };
+eval { $child.plan( $condition ?? ( skip_all => $reason ) !! ( tests => 3 )  ) };
 if ( eval { $@.isa('Test::Builder::Exception') } ) {
     $child.finalize;
     return;
@@ -579,7 +579,7 @@ the appropriate headers.
 =cut
 
 sub expected_tests {
-    my $self = shift;
+    my $self = @_.shift;
     my ($max) = @_;
 
     if (@_) {
@@ -739,7 +739,7 @@ of expected tests).
 =cut
 
 sub has_plan {
-    my $self = shift;
+    my $self = @_.shift;
 
     return( $self.{Expected_Tests} ) if $self.{Expected_Tests};
     return('no_plan') if $self.{No_Plan};
@@ -758,7 +758,7 @@ Skips all the tests, using the given C<$reason>.  Exits immediately with 0.
 sub skip_all {
     my ( $self, $reason ) = @_;
 
-    $self.{Skip_All} = $self.parent ? $reason : 1;
+    $self.{Skip_All} = $self.parent ?? $reason !! 1;
 
     $self._output_plan(0, "SKIP", $reason) unless $self.no_header;
     if ( $self.parent ) {
@@ -820,7 +820,7 @@ sub ok {
     }
     # $test might contain an object which we don't want to accidentally
     # store, so we turn it into a boolean.
-    $test = $test ? 1 : 0;
+    $test = $test ?? 1 !! 0;
 
     lock $self.{Curr_Test};
     $self.{Curr_Test}++;
@@ -846,7 +846,7 @@ sub ok {
 
     unless($test) {
         $out .= "not ";
-        @$result{ 'ok', 'actual_ok' } = ( ( $self.in_todo ? 1 : 0 ), 0 );
+        @$result{ 'ok', 'actual_ok' } = ( ( $self.in_todo ?? 1 !! 0 ), 0 );
     }
     else {
         @$result{ 'ok', 'actual_ok' } = ( 1, $test );
@@ -880,7 +880,7 @@ sub ok {
         $self._print($out);
 
         unless($test) {
-            my $msg = $self.in_todo ? "Failed (TODO)" : "Failed";
+            my $msg = $self.in_todo ?? "Failed (TODO)" !! "Failed";
             $self._print_to_fh( $self._diag_fh, "\n" ) if $ENV{HARNESS_ACTIVE};
 
             my ( undef, $file, $line ) = $self.caller;
@@ -898,14 +898,14 @@ sub ok {
         # Check that we haven't violated the plan
         $self._check_is_passing_plan();
 
-        return $test ? 1 : 0;
+        return $test ?? 1 !! 0;
     }
 
 
 # Check that we haven't yet violated the plan and set
 # is_passing() accordingly
 sub _check_is_passing_plan {
-    my $self = shift;
+    my $self = @_.shift;
 
     my $plan = $self.has_plan;
     return unless defined $plan;        # no plan yet defined
@@ -915,8 +915,8 @@ sub _check_is_passing_plan {
 
 
 sub _unoverload {
-    my $self = shift;
-    my $type = shift;
+    my $self = @_.shift;
+    my $type = @_.shift;
 
     $self._try(sub { require overload; }, die_on_fail => 1);
 
@@ -934,17 +934,17 @@ sub _unoverload {
 sub _is_object {
     my ( $self, $thing ) = @_;
 
-    return $self._try( sub { ref $thing && $thing.isa('UNIVERSAL') } ) ? 1 : 0;
+    return $self._try( sub { ref $thing && $thing.isa('UNIVERSAL') } ) ?? 1 !! 0;
 }
 
 sub _unoverload_str {
-    my $self = shift;
+    my $self = @_.shift;
 
     return $self._unoverload( q[""], @_ );
 }
 
 sub _unoverload_num {
-    my $self = shift;
+    my $self = @_.shift;
 
     $self._unoverload( '0+', @_ );
 
@@ -965,7 +965,7 @@ sub _is_dualvar {
 
     no warnings 'numeric';
     my $numval = $val + 0;
-    return ($numval != 0 and $numval ne $val ? 1 : 0);
+    return ($numval != 0 and $numval ne $val ?? 1 !! 0);
 }
 
 =item B<is_eq>
@@ -1190,8 +1190,8 @@ sub cmp_ok {
     # numeric comparison.
     my $unoverload
     = $numeric_cmps{$type}
-    ? '_unoverload_num'
-    : '_unoverload_str';
+    ?? '_unoverload_num'
+    !! '_unoverload_str';
 
     $self.diag(<<"END") unless $succ;
     An error occurred while using $type:
@@ -1219,8 +1219,8 @@ sub cmp_ok {
 sub _cmp_diag {
     my ( $self, $got, $type, $expect ) = @_;
 
-    $got    = defined $got    ? "'$got'"    : 'undef';
-    $expect = defined $expect ? "'$expect'" : 'undef';
+    $got    = defined $got    ?? "'$got'"    !! 'undef';
+    $expect = defined $expect ?? "'$expect'" !! 'undef';
 
     local $Level = $Level + 1;
     return $self.diag(<<"DIAGNOSTIC");
@@ -1231,7 +1231,7 @@ sub _cmp_diag {
 }
 
 sub _caller_context {
-    my $self = shift;
+    my $self = @_.shift;
 
     my ( $pack, $file, $line ) = $self.caller(1);
 
@@ -1435,14 +1435,14 @@ sub maybe_regex {
     ( undef, $re, $opts ) = $regex =~ m,^ m([^\w\s]) (.+) \1 (\w*) $,sx
 )
 {
-    $usable_regex = length $opts ? "(?$opts)$re" : $re;
+    $usable_regex = length $opts ?? "(?$opts)$re" !! $re;
 }
 
 return $usable_regex;
 }
 
 sub _is_qr {
-    my $regex = shift;
+    my $regex = @_.shift;
 
     # is_regexp() checks for regexes in a robust manner, say if they're
     # blessed.
@@ -1474,7 +1474,7 @@ sub _regex_ok {
             # No point in issuing an uninit warning, they'll see it in the diagnostics
             no warnings 'uninitialized';
 
-            $test = eval $context . q{$test = $thing =~ /$usable_regex/ ? 1 : 0};
+            $test = eval $context . q{$test = $thing =~ /$usable_regex/ ?? 1 !! 0};
         }
 
         $test = !$test if $cmp eq '!~';
@@ -1484,8 +1484,8 @@ sub _regex_ok {
     }
 
     unless($ok) {
-        $thing = defined $thing ? "'$thing'" : 'undef';
-        my $match = $cmp eq '=~' ? "doesn't match" : "matches";
+        $thing = defined $thing ?? "'$thing'" !! 'undef';
+        my $match = $cmp eq '=~' ?? "doesn't match" !! "matches";
 
         local $Level = $Level + 1;
         $self.diag( sprintf <<'DIAGNOSTIC', $thing, $match, $regex );
@@ -1534,7 +1534,7 @@ sub _try {
 
     die $error if $error and $opts{die_on_fail};
 
-    return wantarray ? ( $return, $error ) : $return;
+    return wantarray ?? ( $return, $error ) !! $return;
 }
 
 =end private
@@ -1549,8 +1549,8 @@ Determines if the given C<$thing> can be used as a filehandle.
 =cut
 
 sub is_fh {
-    my $self     = shift;
-    my $maybe_fh = shift;
+    my $self     = @_.shift;
+    my $maybe_fh = @_.shift;
     return 0 unless defined $maybe_fh;
 
     return 1 if ref $maybe_fh  eq 'GLOB';    # its a glob ref
@@ -1581,7 +1581,7 @@ Setting L<$Test::Builder::Level> overrides.  This is typically useful
 localized:
 
 sub my_ok {
-    my $test = shift;
+    my $test = @_.shift;
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     $TB.ok($test);
@@ -1710,7 +1710,7 @@ Mark Fowler <mark@twoshortplanks.com>
 =cut
 
 sub diag {
-    my $self = shift;
+    my $self = @_.shift;
 
     $self._print_comment( $self._diag_fh, @_ );
 }
@@ -1725,16 +1725,16 @@ normally be seen by the user except in verbose mode.
 =cut
 
 sub note {
-    my $self = shift;
+    my $self = @_.shift;
 
     $self._print_comment( $self.output, @_ );
 }
 
 sub _diag_fh {
-    my $self = shift;
+    my $self = @_.shift;
 
     local $Level = $Level + 1;
-    return $self.in_todo ? $self.todo_output : $self.failure_output;
+    return $self.in_todo ?? $self.todo_output !! $self.failure_output;
 }
 
 sub _print_comment {
@@ -1748,7 +1748,7 @@ sub _print_comment {
 
     # Smash args together like print does.
     # Convert undef to 'undef' so its readable.
-    my $msg = join '', map { defined($_) ? $_ : 'undef' } @msgs;
+    my $msg = join '', map { defined($_) ?? $_ !! 'undef' } @msgs;
 
     # Escape the beginning, _print will take care of the rest.
     $msg =~ s/^/# /;
@@ -1775,11 +1775,11 @@ is_deeply($have, $want) || note explain $have;
 =cut
 
 sub explain {
-    my $self = shift;
+    my $self = @_.shift;
 
     return map {
         ref $_
-        ? do {
+        ?? do {
             $self._try(sub { require Data::Dumper }, die_on_fail => 1);
 
             my $dumper = Data::Dumper.new( [$_] );
@@ -1787,7 +1787,7 @@ sub explain {
             $dumper.Sortkeys(1) if $dumper.can("Sortkeys");
             $dumper.Dump;
         }
-        : $_
+        !! $_
     } @_;
 }
 
@@ -1804,7 +1804,7 @@ Prints to the C<output()> filehandle.
 =cut
 
 sub _print {
-    my $self = shift;
+    my $self = @_.shift;
     return $self._print_to_fh( $self.output, @_ );
 }
 
@@ -1891,8 +1891,8 @@ sub todo_output {
 }
 
 sub _new_fh {
-    my $self = shift;
-    my ($file_or_fh) = shift;
+    my $self = @_.shift;
+    my ($file_or_fh) = @_.shift;
 
     my $fh;
     if ( $self.is_fh($file_or_fh) ) {
@@ -1920,7 +1920,7 @@ sub _new_fh {
 }
 
 sub _autoflush {
-    my ($fh) = shift;
+    my ($fh) = @_.shift;
     my $old_fh = select $fh;
     $| = 1;
     select $old_fh;
@@ -1931,7 +1931,7 @@ sub _autoflush {
 my ( $Testout, $Testerr );
 
 sub _dup_stdhandles {
-    my $self = shift;
+    my $self = @_.shift;
 
     $self._open_testhandles;
 
@@ -1948,7 +1948,7 @@ sub _dup_stdhandles {
 }
 
 sub _open_testhandles {
-    my $self = shift;
+    my $self = @_.shift;
 
     return if $self.{Opened_Testhandles};
 
@@ -1997,7 +1997,7 @@ Resets all the output filehandles back to their defaults.
 =cut
 
 sub reset_outputs {
-    my $self = shift;
+    my $self = @_.shift;
 
     $self.output        ($Testout);
     $self.failure_output($Testerr);
@@ -2023,7 +2023,7 @@ point where the original test function was called (C<< $tb.caller >>).
 =cut
 
 sub _message_at_caller {
-    my $self = shift;
+    my $self = @_.shift;
 
     local $Level = $Level + 1;
     my ( $pack, $file, $line ) = $self.caller;
@@ -2031,12 +2031,12 @@ sub _message_at_caller {
 }
 
 sub carp {
-    my $self = shift;
+    my $self = @_.shift;
     return warn $self._message_at_caller(@_);
 }
 
 sub croak {
-    my $self = shift;
+    my $self = @_.shift;
     return die $self._message_at_caller(@_);
 }
 
@@ -2072,7 +2072,7 @@ sub current_test {
         # If the test counter is being pushed forward fill in the details.
         my $test_results = $self.{Test_Results};
         if ( $num > @$test_results ) {
-            my $start = @$test_results ? @$test_results : 0;
+            my $start = @$test_results ?? @$test_results !! 0;
             for( $start .. $num - 1 ) {
                 $test_results.[$_] = &share(
                     {
@@ -2111,10 +2111,10 @@ Don't think about it too much.
 =cut
 
 sub is_passing {
-    my $self = shift;
+    my $self = @_.shift;
 
     if ( @_ ) {
-        $self.{Is_Passing} = shift;
+        $self.{Is_Passing} = @_.shift;
     }
 
     return $self.{Is_Passing};
@@ -2133,7 +2133,7 @@ Of course, test #1 is $tests[0], etc...
 =cut
 
 sub summary {
-    my ($self) = shift;
+    my ($self) = @_.shift;
 
     return map { $_.{'ok'} } @{ $self.{Test_Results} };
 }
@@ -2188,7 +2188,7 @@ reason     => reason for the above (if any)
 =cut
 
 sub details {
-    my $self = shift;
+    my $self = @_.shift;
     return @{ $self.{Test_Results} };
 }
 
@@ -2264,10 +2264,10 @@ Returns true if the test is currently inside a TODO block.
 =cut
 
 sub in_todo {
-    my $self = shift;
+    my $self = @_.shift;
 
     local $Level = $Level + 1;
-    return( defined $self.{Todo} || $self.find_TODO ) ? 1 : 0;
+    return( defined $self.{Todo} || $self.find_TODO ) ?? 1 !! 0;
 }
 
 =item B<todo_start>
@@ -2314,8 +2314,8 @@ Pick one style or another of "TODO" to be on the safe side.
 =cut
 
 sub todo_start {
-    my $self = shift;
-    my $message = @_ ? shift : '';
+    my $self = @_.shift;
+    my $message = @_ ?? @_.shift !! '';
 
     $self.{Start_Todo}++;
     if ( $self.in_todo ) {
@@ -2336,7 +2336,7 @@ preceding C<todo_start> method call.
 =cut
 
 sub todo_end {
-    my $self = shift;
+    my $self = @_.shift;
 
     if ( !$self.{Start_Todo} ) {
         $self.croak('todo_end() called without todo_start()');
@@ -2378,7 +2378,7 @@ do {
     @caller = CORE::caller( $level );
     $level--;
 } until @caller;
-return wantarray ? @caller : $caller[0];
+return wantarray ?? @caller !! $caller[0];
 }
 
 =back
@@ -2401,7 +2401,7 @@ error message.
 
 #'#
 sub _sanity_check {
-    my $self = shift;
+    my $self = @_.shift;
 
     $self._whoa( $self.{Curr_Test} < 0, 'Says here you ran a negative number of tests!' );
     $self._whoa( $self.{Curr_Test} != @{ $self.{Test_Results} },
@@ -2457,7 +2457,7 @@ sub _my_exit {
 =cut
 
 sub _ending {
-    my $self = shift;
+    my $self = @_.shift;
     return if $self.no_ending;
     return if $self.{Ending}++;
 
@@ -2488,7 +2488,7 @@ sub _ending {
             my $num_failed = grep !$_.{'ok'}, @{$test_results}[ 0 .. $self.{Curr_Test} - 1 ];
             if ($num_failed > 0) {
 
-                my $exit_code = $num_failed <= 254 ? $num_failed : 254;
+                my $exit_code = $num_failed <= 254 ?? $num_failed !! 254;
                 _my_exit($exit_code) && return;
             }
         }
@@ -2529,7 +2529,7 @@ sub _ending {
             my $num_extra = $self.{Curr_Test} - $self.{Expected_Tests};
 
             if ( $num_extra != 0 ) {
-                my $s = $self.{Expected_Tests} == 1 ? '' : 's';
+                my $s = $self.{Expected_Tests} == 1 ?? '' !! 's';
                 $self.diag(<<"FAIL");
                 Looks like you planned $self.{Expected_Tests} test$s but ran $self.{Curr_Test}.
                 FAIL
@@ -2538,9 +2538,9 @@ sub _ending {
 
             if ($num_failed) {
                 my $num_tests = $self.{Curr_Test};
-                my $s = $num_failed == 1 ? '' : 's';
+                my $s = $num_failed == 1 ?? '' !! 's';
 
-                my $qualifier = $num_extra == 0 ? '' : ' run';
+                my $qualifier = $num_extra == 0 ?? '' !! ' run';
 
                 $self.diag(<<"FAIL");
                 Looks like you failed $num_failed test$s of $num_tests$qualifier.
@@ -2558,7 +2558,7 @@ sub _ending {
 
             my $exit_code;
             if ($num_failed) {
-                $exit_code = $num_failed <= 254 ? $num_failed : 254;
+                $exit_code = $num_failed <= 254 ?? $num_failed !! 254;
             }
             elsif ( $num_extra != 0 ) {
                 $exit_code = 255;
