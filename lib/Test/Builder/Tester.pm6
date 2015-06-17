@@ -1,15 +1,15 @@
-class Test::Builder::Tester;
+class Test::Builder::Tester {
 
-our $VERSION = "1.28";
+    our $VERSION = "1.28";
 
-use Test::Builder 0.99;
-use Symbol;
-use Carp;
+    use Test::Builder 0.99;
+    use Symbol;
+    use Carp;
 
 =head1 NAME
 
-Test::Builder::Tester - test testsuites that have been built with
-Test::Builder
+    Test::Builder::Tester - test testsuites that have been built with
+    Test::Builder
 
 =head1 SYNOPSIS
 
@@ -23,23 +23,23 @@ Test::Builder
 
 =head1 DESCRIPTION
 
-A module that helps you test testing modules that are built with
-L<Test::Builder>.
+    A module that helps you test testing modules that are built with
+    L<Test::Builder>.
 
-The testing system is designed to be used by performing a three step
-process for each test you wish to test.  This process starts with using
-C<test_out> and C<test_err> in advance to declare what the testsuite you
-are testing will output with L<Test::Builder> to stdout and stderr.
+    The testing system is designed to be used by performing a three step
+    process for each test you wish to test.  This process starts with using
+    C<test_out> and C<test_err> in advance to declare what the testsuite you
+    are testing will output with L<Test::Builder> to stdout and stderr.
 
-You then can run the test(s) from your test suite that call
-L<Test::Builder>.  At this point the output of L<Test::Builder> is
-safely captured by L<Test::Builder::Tester> rather than being
-interpreted as real test output.
+    You then can run the test(s) from your test suite that call
+    L<Test::Builder>.  At this point the output of L<Test::Builder> is
+    safely captured by L<Test::Builder::Tester> rather than being
+    interpreted as real test output.
 
-The final stage is to call C<test_test> that will simply compare what you
-predeclared to what L<Test::Builder> actually outputted, and report the
-results back with a "ok" or "not ok" (with debugging) to the normal
-output.
+    The final stage is to call C<test_test> that will simply compare what you
+    predeclared to what L<Test::Builder> actually outputted, and report the
+    results back with a "ok" or "not ok" (with debugging) to the normal
+    output.
 
 =cut
 
@@ -47,96 +47,96 @@ output.
 # set up testing
 ####
 
-my $t = Test::Builder.new;
+    my $t = Test::Builder.new;
 
 ###
 # make us an exporter
 ###
 
-use Exporter;
-our @ISA = qw(Exporter);
+    use Exporter;
+    our @ISA = qw(Exporter);
 
-our @EXPORT = qw(test_out test_err test_fail test_diag test_test line_num);
+    our @EXPORT = qw(test_out test_err test_fail test_diag test_test line_num);
 
-sub import {
-    my $class = shift;
-    my (@plan) = @_;
+    sub import {
+        my $class = shift;
+        my (@plan) = @_;
 
-    my $caller = caller;
+        my $caller = caller;
 
-    $t.exported_to($caller);
-    $t.plan(@plan);
+        $t.exported_to($caller);
+        $t.plan(@plan);
 
-    my @imports = ();
-    foreach my $idx ( 0 .. $#plan ) {
-        if( $plan[$idx] eq 'import' ) {
-            @imports = @{ $plan[ $idx + 1 ] };
-            last;
+        my @imports = ();
+        foreach my $idx ( 0 .. $#plan ) {
+            if( $plan[$idx] eq 'import' ) {
+                @imports = @{ $plan[ $idx + 1 ] };
+                last;
+            }
         }
-    }
 
-    __PACKAGE__.export_to_level( 1, __PACKAGE__, @imports );
-}
+        __PACKAGE__.export_to_level( 1, __PACKAGE__, @imports );
+    }
 
 ###
 # set up file handles
 ###
 
 # create some private file handles
-my $output_handle = gensym;
-my $error_handle  = gensym;
+    my $output_handle = gensym;
+    my $error_handle  = gensym;
 
 # and tie them to this package
-my $out = tie *$output_handle, "Test::Builder::Tester::Tie", "STDOUT";
-my $err = tie *$error_handle,  "Test::Builder::Tester::Tie", "STDERR";
+    my $out = tie *$output_handle, "Test::Builder::Tester::Tie", "STDOUT";
+    my $err = tie *$error_handle,  "Test::Builder::Tester::Tie", "STDERR";
 
 ####
 # exported functions
 ####
 
 # for remembering that we're testing and where we're testing at
-my $testing = 0;
-my $testing_num;
-my $original_is_passing;
+    my $testing = 0;
+    my $testing_num;
+    my $original_is_passing;
 
 # remembering where the file handles were originally connected
-my $original_output_handle;
-my $original_failure_handle;
-my $original_todo_handle;
+    my $original_output_handle;
+    my $original_failure_handle;
+    my $original_todo_handle;
 
-my $original_harness_env;
+    my $original_harness_env;
 
 # function that starts testing and redirects the filehandles for now
-sub _start_testing {
-    # even if we're running under Test::Harness pretend we're not
-    # for now.  This needed so Test::Builder doesn't add extra spaces
-    $original_harness_env = $ENV{HARNESS_ACTIVE} || 0;
-    $ENV{HARNESS_ACTIVE} = 0;
+    sub _start_testing {
+        # even if we're running under Test::Harness pretend we're not
+        # for now.  This needed so Test::Builder doesn't add extra spaces
+        $original_harness_env = $ENV{HARNESS_ACTIVE} || 0;
+        $ENV{HARNESS_ACTIVE} = 0;
 
-    # remember what the handles were set to
-    $original_output_handle  = $t.output();
-    $original_failure_handle = $t.failure_output();
-    $original_todo_handle    = $t.todo_output();
+        # remember what the handles were set to
+        $original_output_handle  = $t.output();
+        $original_failure_handle = $t.failure_output();
+        $original_todo_handle    = $t.todo_output();
 
-    # switch out to our own handles
-    $t.output($output_handle);
-    $t.failure_output($error_handle);
-    $t.todo_output($output_handle);
+        # switch out to our own handles
+        $t.output($output_handle);
+        $t.failure_output($error_handle);
+        $t.todo_output($output_handle);
 
-    # clear the expected list
-    $out.reset();
-    $err.reset();
+        # clear the expected list
+        $out.reset();
+        $err.reset();
 
-    # remember that we're testing
-    $testing     = 1;
-    $testing_num = $t.current_test;
-    $t.current_test(0);
-    $original_is_passing  = $t.is_passing;
-    $t.is_passing(1);
+        # remember that we're testing
+        $testing     = 1;
+        $testing_num = $t.current_test;
+        $t.current_test(0);
+        $original_is_passing  = $t.is_passing;
+        $t.is_passing(1);
 
-    # look, we shouldn't do the ending stuff
-    $t.no_ending(1);
-}
+        # look, we shouldn't do the ending stuff
+        $t.no_ending(1);
+    }
 
 =head2 Functions
 
@@ -152,16 +152,16 @@ Procedures for predeclaring the output that your test suite is
 expected to produce until C<test_test> is called.  These procedures
 automatically assume that each line terminates with "\n".  So
 
-   test_out("ok 1","ok 2");
+test_out("ok 1","ok 2");
 
 is the same as
 
-   test_out("ok 1\nok 2");
+test_out("ok 1\nok 2");
 
 which is even the same as
 
-   test_out("ok 1");
-   test_out("ok 2");
+test_out("ok 1");
+test_out("ok 2");
 
 Once C<test_out> or C<test_err> (or C<test_fail> or C<test_diag>) have
 been called, all further output from L<Test::Builder> will be
@@ -194,21 +194,21 @@ output, and because it has changed between Test::Builder versions, rather
 than forcing you to call C<test_err> with the string all the time like
 so
 
-    test_err("# Failed test ($0 at line ".line_num(+1).")");
+test_err("# Failed test ($0 at line ".line_num(+1).")");
 
 C<test_fail> exists as a convenience function that can be called
 instead.  It takes one argument, the offset from the current line that
 the line that causes the fail is on.
 
-    test_fail(+1);
+test_fail(+1);
 
 This means that the example in the synopsis could be rewritten
 more simply as:
 
-   test_out("not ok 1 - foo");
-   test_fail(+1);
-   fail("foo");
-   test_test("fail works");
+test_out("not ok 1 - foo");
+test_fail(+1);
+fail("foo");
+test_test("fail works");
 
 =cut
 
@@ -235,20 +235,20 @@ The C<test_diag> function prepends comment hashes and spacing to the
 start and newlines to the end of the expected output passed to it and
 adds it to the list of expected error output.  So, instead of writing
 
-   test_err("# Couldn't open file");
+test_err("# Couldn't open file");
 
 you can write
 
-   test_diag("Couldn't open file");
+test_diag("Couldn't open file");
 
 Remember that L<Test::Builder>'s diag function will not add newlines to
 the end of output and test_diag will. So to check
 
-   Test::Builder.new.diag("foo\n","bar\n");
+Test::Builder.new.diag("foo\n","bar\n");
 
 You would do
 
-  test_diag("foo","bar")
+test_diag("foo","bar")
 
 without the newlines.
 
@@ -318,7 +318,7 @@ sub test_test {
 
     # er, are we testing?
     croak "Not testing.  You must declare output with a test function first."
-      unless $testing;
+    unless $testing;
 
     # okay, reconnect the test suite back to the saved handles
     $t.output($original_output_handle);
@@ -335,20 +335,20 @@ sub test_test {
 
     # check the output we've stashed
     unless( $t.ok( ( $args{skip_out} || $out.check ) &&
-                    ( $args{skip_err} || $err.check ), $mess ) 
-    )
-    {
-        # print out the diagnostic information about why this
-        # test failed
+    ( $args{skip_err} || $err.check ), $mess ) 
+)
+{
+    # print out the diagnostic information about why this
+    # test failed
 
-        local $_;
+    local $_;
 
-        $t.diag( map { "$_\n" } $out.complaint )
-          unless $args{skip_out} || $out.check;
+    $t.diag( map { "$_\n" } $out.complaint )
+    unless $args{skip_out} || $out.check;
 
-        $t.diag( map { "$_\n" } $err.complaint )
-          unless $args{skip_err} || $err.check;
-    }
+    $t.diag( map { "$_\n" } $err.complaint )
+    unless $args{skip_err} || $err.check;
+}
 }
 
 =item line_num
@@ -401,9 +401,9 @@ current setting.
 To enable colouring from the command line, you can use the
 L<Text::Builder::Tester::Color> module like so:
 
-   perl -Mlib=Text::Builder::Tester::Color test.t
+perl -Mlib=Text::Builder::Tester::Color test.t
 
-Or by including the L<Test::Builder::Tester::Color> module directly in
+    Or by including the L<Test::Builder::Tester::Color> module directly in
 the PERL5LIB.
 
 =cut
@@ -441,7 +441,7 @@ Copyright Micheal G Schwern 2001.  Used and distributed with
 permission.
 
 This program is free software; you can redistribute it
-and/or modify it under the same terms as Perl itself.
+    and/or modify it under the same terms as Perl itself.
 
 =head1 MAINTAINERS
 
@@ -464,10 +464,12 @@ L<Test::Builder>, L<Test::Builder::Tester::Color>, L<Test::More>.
 
 1;
 
+}
+
 ####################################################################
 # Helper class that is used to remember expected and received data
 
-class Test::Builder::Tester::Tie;
+class Test::Builder::Tester::Tie {
 
 ##
 # add line(s) to be expected
@@ -617,3 +619,5 @@ sub GETC     { }
 sub FILENO   { }
 
 1;
+
+}

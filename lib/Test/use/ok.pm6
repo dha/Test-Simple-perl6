@@ -1,8 +1,10 @@
-class Test::use::ok;
-use 5.005;
-$Test::use::ok::VERSION = '0.16';
+class Test::use::ok {
+    use 5.005;
+    $Test::use::ok::VERSION = '0.16';
 
-__END__
+    __END__
+
+}
 
 =head1 NAME
 
@@ -10,7 +12,7 @@ Test::use::ok - Alternative to Test::More::use_ok
 
 =head1 SYNOPSIS
 
-    use ok 'Some::Module';
+use ok 'Some::Module';
 
 =head1 DESCRIPTION
 
@@ -20,20 +22,20 @@ compile-time and prototypes are properly honored.
 
 That is, instead of writing this:
 
-    use_ok( 'Some::Module' );
-    use_ok( 'Other::Module' );
+use_ok( 'Some::Module' );
+use_ok( 'Other::Module' );
 
 One should write this:
 
-    BEGIN { use_ok( 'Some::Module' ); }
-    BEGIN { use_ok( 'Other::Module' ); }
+BEGIN { use_ok( 'Some::Module' ); }
+BEGIN { use_ok( 'Other::Module' ); }
 
 However, people often either forget to add C<BEGIN>, or mistakenly group
 C<use_ok> with other tests in a single C<BEGIN> block, which can create subtle
 differences in execution order.
 
 With this module, simply change all C<use_ok> in test scripts to C<use ok>,
-and they will be executed at C<BEGIN> time.  The explicit space after C<use>
+    and they will be executed at C<BEGIN> time.  The explicit space after C<use>
 makes it clear that this is a single compile-time action.
 
 =head1 SEE ALSO
@@ -53,7 +55,7 @@ L<Test::More>
 =head1 CC0 1.0 Universal
 
 To the extent possible under law, 唐鳳 has waived all copyright and related
-or neighboring rights to L<Test-use-ok>.
+    or neighboring rights to L<Test-use-ok>.
 
 This work is published from Taiwan.
 

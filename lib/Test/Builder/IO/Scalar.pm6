@@ -1,18 +1,18 @@
-class Test::Builder::IO::Scalar;
+class Test::Builder::IO::Scalar {
 
 
 =head1 NAME
 
-Test::Builder::IO::Scalar - A copy of IO::Scalar for Test::Builder
+    Test::Builder::IO::Scalar - A copy of IO::Scalar for Test::Builder
 
 =head1 DESCRIPTION
 
-This is a copy of L<IO::Scalar> which ships with L<Test::Builder> to
-support scalar references as filehandles on Perl 5.6.  Newer
-versions of Perl simply use C<open()>'s built in support.
+    This is a copy of L<IO::Scalar> which ships with L<Test::Builder> to
+    support scalar references as filehandles on Perl 5.6.  Newer
+    versions of Perl simply use C<open()>'s built in support.
 
-L<Test::Builder> can not have dependencies on other modules without
-careful consideration, so its simply been copied into the distribution.
+    L<Test::Builder> can not have dependencies on other modules without
+    careful consideration, so its simply been copied into the distribution.
 
 =head1 COPYRIGHT and LICENSE
 
@@ -198,7 +198,7 @@ sub getline {
 
     ### Case 1: $/ is undef: slurp all...
     if    (!defined($/)) {
-	*$self.{Pos} = length $$sr;
+        *$self.{Pos} = length $$sr;
         return substr($$sr, $i);
     }
 
@@ -208,7 +208,7 @@ sub getline {
         ### Seek ahead for "\n"... yes, this really is faster than regexps.
         my $len = length($$sr);
         for (; $i < $len; ++$i) {
-           last if ord (substr ($$sr, $i, 1)) == 10;
+            last if ord (substr ($$sr, $i, 1)) == 10;
         }
 
         ### Extract the line:
@@ -228,11 +228,11 @@ sub getline {
     ###        (Thanks to Dominique Quatravaux.)
     elsif (ref($/)) {
         my $len = length($$sr);
-		my $i = ${$/} + 0;
-		my $line = substr ($$sr, *$self.{Pos}, $i);
-		*$self.{Pos} += $i;
+        my $i = ${$/} + 0;
+        my $line = substr ($$sr, *$self.{Pos}, $i);
+        *$self.{Pos} += $i;
         *$self.{Pos} = $len if (*$self.{Pos} > $len);
-		return $line;
+        return $line;
     }
 
     ### Case 4: $/ is either "" (paragraphs) or something weird...
@@ -242,24 +242,24 @@ sub getline {
     else {
         pos($$sr) = $i;
 
-	### If in paragraph mode, skip leading lines (and update i!):
+        ### If in paragraph mode, skip leading lines (and update i!):
         length($/) or
-	    (($$sr =~ m/\G\n*/g) and ($i = pos($$sr)));
+        (($$sr =~ m/\G\n*/g) and ($i = pos($$sr)));
 
         ### If we see the separator in the buffer ahead...
         if (length($/)
-	    ?  $$sr =~ m,\Q$/\E,g          ###   (ordinary sep) TBD: precomp!
-            :  $$sr =~ m,\n\n,g            ###   (a paragraph)
-            ) {
-            *$self.{Pos} = pos $$sr;
-            return substr($$sr, $i, *$self.{Pos}-$i);
-        }
-        ### Else if no separator remains, just slurp the rest:
-        else {
-            *$self.{Pos} = length $$sr;
-            return substr($$sr, $i);
-        }
+        ?  $$sr =~ m,\Q$/\E,g          ###   (ordinary sep) TBD: precomp!
+        :  $$sr =~ m,\n\n,g            ###   (a paragraph)
+    ) {
+        *$self.{Pos} = pos $$sr;
+        return substr($$sr, $i, *$self.{Pos}-$i);
     }
+    ### Else if no separator remains, just slurp the rest:
+    else {
+        *$self.{Pos} = length $$sr;
+        return substr($$sr, $i);
+    }
+}
 }
 
 #------------------------------
@@ -366,8 +366,8 @@ Returns the number of bytes actually read, 0 on end-of-file, undef on error.
 =cut
 
 sub sysread {
-  my $self = shift;
-  $self.read(@_);
+    my $self = shift;
+    $self.read(@_);
 }
 
 #------------------------------
@@ -380,8 +380,8 @@ Write some bytes to the scalar.
 =cut
 
 sub syswrite {
-  my $self = shift;
-  $self.write(@_);
+    my $self = shift;
+    $self.write(@_);
 }
 
 =back
@@ -505,7 +505,7 @@ Default is false in 1.x, but cold-welded true in 2.x and later.
 sub use_RS {
     my ($self, $yesno) = @_;
     carp "use_RS is deprecated and ignored; \$/ is always consulted\n";
- }
+}
 
 #------------------------------
 
@@ -549,8 +549,8 @@ sub sref { *{shift()}.{SR} }
 # Conventional tiehandle interface:
 sub TIEHANDLE {
     ((defined($_[1]) && UNIVERSAL::isa($_[1], __PACKAGE__))
-     ? $_[1]
-     : shift.new(@_));
+    ? $_[1]
+    : shift.new(@_));
 }
 sub GETC      { shift.getc(@_) }
 sub PRINT     { shift.print(@_) }
@@ -569,7 +569,7 @@ sub EOF       { shift.eof(@_); }
 
 __END__
 
-
+}
 
 =back
 
@@ -584,16 +584,16 @@ Attempting to use these functions with an IO::Scalar will not work
 prior to 5.005_57. IO::Scalar will not have the relevant methods
 invoked; and even worse, this kind of bug can lie dormant for a while.
 If you turn warnings on (via C<$^W> or C<perl -w>),
-and you see something like this...
+    and you see something like this...
 
-    attempt to seek on unopened filehandle
+attempt to seek on unopened filehandle
 
 ...then you are probably trying to use one of these functions
 on an IO::Scalar with an old Perl.  The remedy is to simply
 use the OO version; e.g.:
 
-    $SH.seek(0,0);    ### GOOD: will work on any 5.005
-    seek($SH,0,0);     ### WARNING: will only work on 5.005_57 and beyond
+$SH.seek(0,0);    ### GOOD: will work on any 5.005
+seek($SH,0,0);     ### WARNING: will only work on 5.005_57 and beyond
 
 
 =head1 VERSION
@@ -634,11 +634,11 @@ for his offset-using read() and write() implementations.
 
 I<Richard Jones,>
 for his patches to massively improve the performance of C<getline()>
-and add C<sysread> and C<syswrite>.
+    and add C<sysread> and C<syswrite>.
 
 I<B. K. Oxley (binkley),>
 for stringification and inheritance improvements,
-and sundry good ideas.
+    and sundry good ideas.
 
 I<Doug Wilson,>
 for the IO::Handle inheritance and automatic tie-ing.

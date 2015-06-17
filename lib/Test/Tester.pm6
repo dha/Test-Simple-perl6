@@ -1,286 +1,286 @@
-class Test::Tester;
+class Test::Tester {
 
-BEGIN
-{
-	if (*Test::Builder::new{CODE})
-	{
-		warn "You should load Test::Tester before Test::Builder (or anything that loads Test::Builder)" 
-	}
-}
+    BEGIN
+    {
+        if (*Test::Builder::new{CODE})
+        {
+            warn "You should load Test::Tester before Test::Builder (or anything that loads Test::Builder)" 
+        }
+    }
 
-use Test::Builder;
-use Test::Tester::CaptureRunner;
-use Test::Tester::Delegate;
+    use Test::Builder;
+    use Test::Tester::CaptureRunner;
+    use Test::Tester::Delegate;
 
-require Exporter;
+    require Exporter;
 
-our @ISA;
-our @EXPORT;
-our $VERSION;
+    our @ISA;
+    our @EXPORT;
+    our $VERSION;
 
-$VERSION = "0.114";
-@EXPORT = qw( run_tests check_tests check_test cmp_results show_space );
-@ISA = qw( Exporter );
+    $VERSION = "0.114";
+    @EXPORT = qw( run_tests check_tests check_test cmp_results show_space );
+    @ISA = qw( Exporter );
 
-my $Test = Test::Builder.new;
-my $Capture = Test::Tester::Capture.new;
-my $Delegator = Test::Tester::Delegate.new;
-$Delegator.{Object} = $Test;
+    my $Test = Test::Builder.new;
+    my $Capture = Test::Tester::Capture.new;
+    my $Delegator = Test::Tester::Delegate.new;
+    $Delegator.{Object} = $Test;
 
-my $runner = Test::Tester::CaptureRunner.new;
+    my $runner = Test::Tester::CaptureRunner.new;
 
-my $want_space = $ENV{TESTTESTERSPACE};
+    my $want_space = $ENV{TESTTESTERSPACE};
 
-sub show_space
-{
-	$want_space = 1;
-}
+    sub show_space
+    {
+        $want_space = 1;
+    }
 
-my $colour = '';
-my $reset = '';
+    my $colour = '';
+    my $reset = '';
 
-if (my $want_colour = $ENV{TESTTESTERCOLOUR} || $ENV{TESTTESTERCOLOUR})
-{
-	if (eval "require Term::ANSIColor")
-	{
-		my ($f, $b) = split(",", $want_colour);
-		$colour = Term::ANSIColor::color($f).Term::ANSIColor::color("on_$b");
-		$reset = Term::ANSIColor::color("reset");
-	}
+    if (my $want_colour = $ENV{TESTTESTERCOLOUR} || $ENV{TESTTESTERCOLOUR})
+    {
+        if (eval "require Term::ANSIColor")
+        {
+            my ($f, $b) = split(",", $want_colour);
+            $colour = Term::ANSIColor::color($f).Term::ANSIColor::color("on_$b");
+            $reset = Term::ANSIColor::color("reset");
+        }
 
-}
+    }
 
-sub new_new
-{
-	return $Delegator;
-}
+    sub new_new
+    {
+        return $Delegator;
+    }
 
-sub capture
-{
-	return Test::Tester::Capture.new;
-}
+    sub capture
+    {
+        return Test::Tester::Capture.new;
+    }
 
-sub fh
-{
-	# experiment with capturing output, I don't like it
-	$runner = Test::Tester::FHRunner.new;
+    sub fh
+    {
+        # experiment with capturing output, I don't like it
+        $runner = Test::Tester::FHRunner.new;
 
-	return $Test;
-}
+        return $Test;
+    }
 
-sub find_run_tests
-{
-	my $d = 1;
-	my $found = 0;
-	while ((not $found) and (my ($sub) = (caller($d))[3]) )
-	{
+    sub find_run_tests
+    {
+        my $d = 1;
+        my $found = 0;
+        while ((not $found) and (my ($sub) = (caller($d))[3]) )
+        {
 #		print "$d: $sub\n";
-		$found = ($sub eq "Test::Tester::run_tests");
-		$d++;
-	}
+$found = ($sub eq "Test::Tester::run_tests");
+$d++;
+    }
 
 #	die "Didn't find 'run_tests' in caller stack" unless $found;
-	return $d;
+return $d;
 }
 
 sub run_tests
 {
-	local($Delegator.{Object}) = $Capture;
+    local($Delegator.{Object}) = $Capture;
 
-	$runner.run_tests(@_);
+    $runner.run_tests(@_);
 
-	return ($runner.get_premature, $runner.get_results);
+    return ($runner.get_premature, $runner.get_results);
 }
 
 sub check_test
 {
-	my $test = shift;
-	my $expect = shift;
-	my $name = shift;
-	$name = "" unless defined($name);
+    my $test = shift;
+    my $expect = shift;
+    my $name = shift;
+    $name = "" unless defined($name);
 
-	@_ = ($test, [$expect], $name);
-	goto &check_tests;
+    @_ = ($test, [$expect], $name);
+    goto &check_tests;
 }
 
 sub check_tests
 {
-	my $test = shift;
-	my $expects = shift;
-	my $name = shift;
-	$name = "" unless defined($name);
+    my $test = shift;
+    my $expects = shift;
+    my $name = shift;
+    $name = "" unless defined($name);
 
-	my ($prem, @results) = eval { run_tests($test, $name) };
+    my ($prem, @results) = eval { run_tests($test, $name) };
 
-	$Test.ok(! $@, "Test '$name' completed") || $Test.diag($@);
-	$Test.ok(! length($prem), "Test '$name' no premature diagnostication") ||
-		$Test.diag("Before any testing anything, your tests said\n$prem");
+    $Test.ok(! $@, "Test '$name' completed") || $Test.diag($@);
+    $Test.ok(! length($prem), "Test '$name' no premature diagnostication") ||
+    $Test.diag("Before any testing anything, your tests said\n$prem");
 
-	local $Test::Builder::Level = $Test::Builder::Level + 1;
-	cmp_results(\@results, $expects, $name);
-	return ($prem, @results);
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    cmp_results(\@results, $expects, $name);
+    return ($prem, @results);
 }
 
 sub cmp_field
 {
-	my ($result, $expect, $field, $desc) = @_;
+    my ($result, $expect, $field, $desc) = @_;
 
-	if (defined $expect.{$field})
-	{
-		$Test.is_eq($result.{$field}, $expect.{$field},
-			"$desc compare $field");
-	}
+    if (defined $expect.{$field})
+    {
+        $Test.is_eq($result.{$field}, $expect.{$field},
+        "$desc compare $field");
+    }
 }
 
 sub cmp_result
 {
-	my ($result, $expect, $name) = @_;
+    my ($result, $expect, $name) = @_;
 
-	my $sub_name = $result.{name};
-	$sub_name = "" unless defined($name);
+    my $sub_name = $result.{name};
+    $sub_name = "" unless defined($name);
 
-	my $desc = "subtest '$sub_name' of '$name'";
+    my $desc = "subtest '$sub_name' of '$name'";
 
-	{
-		local $Test::Builder::Level = $Test::Builder::Level + 1;
+    {
+        local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-		cmp_field($result, $expect, "ok", $desc);
+        cmp_field($result, $expect, "ok", $desc);
 
-		cmp_field($result, $expect, "actual_ok", $desc);
+        cmp_field($result, $expect, "actual_ok", $desc);
 
-		cmp_field($result, $expect, "type", $desc);
+        cmp_field($result, $expect, "type", $desc);
 
-		cmp_field($result, $expect, "reason", $desc);
+        cmp_field($result, $expect, "reason", $desc);
 
-		cmp_field($result, $expect, "name", $desc);
-	}
+        cmp_field($result, $expect, "name", $desc);
+    }
 
-	# if we got no depth then default to 1
-	my $depth = 1;
-	if (exists $expect.{depth})
-	{
-		$depth = $expect.{depth};
-	}
+    # if we got no depth then default to 1
+    my $depth = 1;
+    if (exists $expect.{depth})
+    {
+        $depth = $expect.{depth};
+    }
 
-	# if depth was explicitly undef then don't test it
-	if (defined $depth)
-	{
-		$Test.is_eq($result.{depth}, $depth, "checking depth") ||
-			$Test.diag('You need to change $Test::Builder::Level');
-	}
+    # if depth was explicitly undef then don't test it
+    if (defined $depth)
+    {
+        $Test.is_eq($result.{depth}, $depth, "checking depth") ||
+        $Test.diag('You need to change $Test::Builder::Level');
+    }
 
-	if (defined(my $exp = $expect.{diag}))
-	{
-		# if there actually is some diag then put a \n on the end if it's not
-		# there already
+    if (defined(my $exp = $expect.{diag}))
+    {
+        # if there actually is some diag then put a \n on the end if it's not
+        # there already
 
-		$exp .= "\n" if (length($exp) and $exp !~ /\n$/);
-		if (not $Test.ok($result.{diag} eq $exp,
-			"subtest '$sub_name' of '$name' compare diag")
-		)
-		{
-			my $got = $result.{diag};
-			my $glen = length($got);
-			my $elen = length($exp);
-			for ($got, $exp)
-			{
-				my @lines = split("\n", $_);
-	 			$_ = join("\n", map {
-					if ($want_space)
-					{
-						$_ = $colour.escape($_).$reset;
-					}
-					else
-					{
-						"'$colour$_$reset'"
-					}
-				} @lines);
-			}
+        $exp .= "\n" if (length($exp) and $exp !~ /\n$/);
+        if (not $Test.ok($result.{diag} eq $exp,
+        "subtest '$sub_name' of '$name' compare diag")
+    )
+    {
+        my $got = $result.{diag};
+        my $glen = length($got);
+        my $elen = length($exp);
+        for ($got, $exp)
+        {
+            my @lines = split("\n", $_);
+            $_ = join("\n", map {
+                if ($want_space)
+                {
+                    $_ = $colour.escape($_).$reset;
+                }
+                else
+                {
+                    "'$colour$_$reset'"
+                }
+            } @lines);
+        }
 
-			$Test.diag(<<EOM);
-Got diag ($glen bytes):
-$got
-Expected diag ($elen bytes):
-$exp
-EOM
+        $Test.diag(<<EOM);
+        Got diag ($glen bytes):
+        $got
+        Expected diag ($elen bytes):
+        $exp
+        EOM
 
-		}
-	}
+    }
+}
 }
 
 sub escape
 {
-	my $str = shift;
-	my $res = '';
-	for my $char (split("", $str))
-	{
-		my $c = ord($char);
-		if(($c>32 and $c<125) or $c == 10)
-		{
-			$res .= $char;
-		}
-		else
-		{
-			$res .= sprintf('\x{%x}', $c)
-		}
-	}
-	return $res;
+    my $str = shift;
+    my $res = '';
+    for my $char (split("", $str))
+    {
+        my $c = ord($char);
+        if(($c>32 and $c<125) or $c == 10)
+        {
+            $res .= $char;
+        }
+        else
+        {
+            $res .= sprintf('\x{%x}', $c)
+        }
+    }
+    return $res;
 }
 
 sub cmp_results
 {
-	my ($results, $expects, $name) = @_;
+    my ($results, $expects, $name) = @_;
 
-	$Test.is_num(scalar @$results, scalar @$expects, "Test '$name' result count");
+    $Test.is_num(scalar @$results, scalar @$expects, "Test '$name' result count");
 
-	for (my $i = 0; $i < @$expects; $i++)
-	{
-		my $expect = $expects.[$i];
-		my $result = $results.[$i];
+    for (my $i = 0; $i < @$expects; $i++)
+    {
+        my $expect = $expects.[$i];
+        my $result = $results.[$i];
 
-		local $Test::Builder::Level = $Test::Builder::Level + 1;
-		cmp_result($result, $expect, $name);
-	}
+        local $Test::Builder::Level = $Test::Builder::Level + 1;
+        cmp_result($result, $expect, $name);
+    }
 }
 
 ######## nicked from Test::More
 sub plan {
-	my (@plan) = @_;
+    my (@plan) = @_;
 
-	my $caller = caller;
+    my $caller = caller;
 
-	$Test.exported_to($caller);
+    $Test.exported_to($caller);
 
-	my @imports = ();
-	foreach my $idx (0..$#plan) {
-		if( $plan[$idx] eq 'import' ) {
-			my ($tag, $imports) = splice @plan, $idx, 2;
-			@imports = @$imports;
-			last;
-		}
-	}
+    my @imports = ();
+    foreach my $idx (0..$#plan) {
+        if( $plan[$idx] eq 'import' ) {
+            my ($tag, $imports) = splice @plan, $idx, 2;
+            @imports = @$imports;
+            last;
+        }
+    }
 
-	$Test.plan(@plan);
+    $Test.plan(@plan);
 
-	__PACKAGE__._export_to_level(1, __PACKAGE__, @imports);
+    __PACKAGE__._export_to_level(1, __PACKAGE__, @imports);
 }
 
 sub import {
-	my ($class) = shift;
-		{
-			no warnings 'redefine';
-			*Test::Builder::new = \&new_new;
-		}
-	goto &plan;
+    my ($class) = shift;
+    {
+        no warnings 'redefine';
+        *Test::Builder::new = \&new_new;
+    }
+    goto &plan;
 }
 
 sub _export_to_level
 {
-        my $pkg = shift;
-	my $level = shift;
-	(undef) = shift;	# redundant arg
-	my $callpkg = caller($level);
-	$pkg.export($callpkg, @_);
+    my $pkg = shift;
+    my $level = shift;
+    (undef) = shift;	# redundant arg
+    my $callpkg = caller($level);
+    $pkg.export($callpkg, @_);
 }
 
 
@@ -290,43 +290,45 @@ sub _export_to_level
 
 __END__
 
+}
+
 =head1 NAME
 
 Test::Tester - Ease testing test modules built with Test::Builder
 
 =head1 SYNOPSIS
 
-  use Test::Tester tests => 6;
+use Test::Tester tests => 6;
 
-  use Test::MyStyle;
+use Test::MyStyle;
 
-  check_test(
+check_test(
     sub {
-      is_mystyle_eq("this", "that", "not eq");
+        is_mystyle_eq("this", "that", "not eq");
     },
     {
-      ok => 0, # expect this to fail
-      name => "not eq",
-      diag => "Expected: 'this'\nGot: 'that'",
+        ok => 0, # expect this to fail
+        name => "not eq",
+        diag => "Expected: 'this'\nGot: 'that'",
     }
-  );
+);
 
-or
+    or
 
-  use Test::Tester;
+use Test::Tester;
 
-  use Test::More tests => 3;
-  use Test::MyStyle;
+use Test::More tests => 3;
+use Test::MyStyle;
 
-  my ($premature, @results) = run_tests(
+my ($premature, @results) = run_tests(
     sub {
-      is_database_alive("dbname");
+        is_database_alive("dbname");
     }
-  );
+);
 
-  # now use Test::More::like to check the diagnostic output
+# now use Test::More::like to check the diagnostic output
 
-  like($results[0].{diag}, "/^Database ping took \\d+ seconds$"/, "diag");
+like($results[0].{diag}, "/^Database ping took \\d+ seconds$"/, "diag");
 
 =head1 DESCRIPTION
 
@@ -338,7 +340,7 @@ allows you to test it with the minimum of effort.
 From version 0.08 Test::Tester no longer requires you to included anything
 special in your test modules. All you need to do is
 
-  use Test::Tester;
+use Test::Tester;
 
 in your test script B<before> any other Test::Builder based modules and away
 you go.
@@ -351,14 +353,14 @@ using it to test itself may give the wrong answers).
 
 The easiest way to test is to do something like
 
-  check_test(
+check_test(
     sub { is_mystyle_eq("this", "that", "not eq") },
     {
-      ok => 0, # we expect the test to fail
-      name => "not eq",
-      diag => "Expected: 'this'\nGot: 'that'",
+        ok => 0, # we expect the test to fail
+        name => "not eq",
+        diag => "Expected: 'this'\nGot: 'that'",
     }
-  );
+);
 
 this will execute the is_mystyle_eq test, capturing it's results and
 checking that they are what was expected.
@@ -368,13 +370,13 @@ example, the diagnostic output may be quite long or complex or it may involve
 something that you cannot predict in advance like a timestamp. In this case
 you can get direct access to the test results:
 
-  my ($premature, @results) = run_tests(
+my ($premature, @results) = run_tests(
     sub {
-      is_database_alive("dbname");
+        is_database_alive("dbname");
     }
-  );
+);
 
-  like($result[0].{diag}, "/^Database ping took \\d+ seconds$"/, "diag");
+like($result[0].{diag}, "/^Database ping took \\d+ seconds$"/, "diag");
 
 
 We cannot predict how long the database ping will take so we use
@@ -390,16 +392,16 @@ Test::Builder one. How to do this depends on your module but assuming that
 your module holds the Test::Builder object in $Test and that all your test
 routines access it through $Test then providing a function something like this
 
-  sub set_builder
-  {
+sub set_builder
+{
     $Test = shift;
-  }
+}
 
 should allow your test scripts to do
 
-  Test::YourModule::set_builder(Test::Tester.capture);
+Test::YourModule::set_builder(Test::Tester.capture);
 
-and after that any tests inside your module will captured.
+    and after that any tests inside your module will captured.
 
 =head1 TEST RESULTS
 
@@ -459,13 +461,13 @@ when a test fails. It is calculated by looking at caller() and
 $Test::Builder::Level. It should count how many subroutines there are before
 jumping into the function you are testing. So for example in
 
-  run_tests( sub { my_test_function("a", "b") } );
+run_tests( sub { my_test_function("a", "b") } );
 
 the depth should be 1 and in
 
-  sub deeper { my_test_function("a", "b") }
+sub deeper { my_test_function("a", "b") }
 
-  run_tests(sub { deeper() });
+run_tests(sub { deeper() });
 
 depth should be 2, that is 1 for the sub {} and one for deeper(). This
 might seem a little complex but if your tests look like the simple
@@ -497,10 +499,10 @@ probably whitespace. From version 0.10 on, Test::Tester surrounds the
 expected and got diag values with single quotes to make it easier to spot
 trailing whitesapce. So in this example
 
-  # Got diag (5 bytes):
-  # 'abcd '
-  # Expected diag (4 bytes):
-  # 'abcd'
+# Got diag (5 bytes):
+# 'abcd '
+# Expected diag (4 bytes):
+# 'abcd'
 
 it is quite clear that there is a space at the end of the first string.
 Another way to solve this problem is to use colour and inverse video on an
@@ -516,10 +518,10 @@ find subtle differences between strings. To turn on this mode either call
 show_space() in your test script or set the TESTTESTERSPACE environment
 variable to be a true value. The example above would then look like
 
-  # Got diag (5 bytes):
-  # abcd\x{20}
-  # Expected diag (4 bytes):
-  # abcd
+# Got diag (5 bytes):
+# abcd\x{20}
+# Expected diag (4 bytes):
+# abcd
 
 =head1 COLOUR
 
